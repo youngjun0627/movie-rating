@@ -1,0 +1,68 @@
+1.8.0
+11.1
+True
+Traceback (most recent call last):
+  File "slowfastnet.py", line 204, in <module>
+    model = resnet50(class_num = num_classes, label_num = num_label, mode = mode).cuda()
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 491, in cuda
+    return self._apply(lambda t: t.cuda(device))
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 387, in _apply
+    module._apply(fn)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 409, in _apply
+    param_applied = fn(param)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 491, in <lambda>
+    return self._apply(lambda t: t.cuda(device))
+KeyboardInterrupt
+1.8.0
+11.1
+True
+Traceback (most recent call last):
+  File "slowfastnet.py", line 208, in <module>
+    output = model(input_tensor)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/uchan/slowfast/MODELS/x3d.py", line 322, in forward
+    x = self.layer1(x)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/container.py", line 119, in forward
+    input = module(input)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/uchan/slowfast/MODELS/x3d.py", line 147, in forward
+    out = self.bn1(out)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/uchan/slowfast/MODELS/x3d.py", line 56, in forward
+    x = x * self.weight.view((-1, 1, 1, 1))
+RuntimeError: CUDA out of memory. Tried to allocate 324.00 MiB (GPU 0; 10.76 GiB total capacity; 9.23 GiB already allocated; 263.69 MiB free; 9.42 GiB reserved in total by PyTorch)
+1.8.0
+11.1
+True
+torch.Size([1, 400, 1])
+Traceback (most recent call last):
+  File "slowfastnet.py", line 208, in <module>
+    output = model(input_tensor)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/uchan/slowfast/MODELS/x3d.py", line 322, in forward
+    x = self.layer1(x)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/container.py", line 119, in forward
+    input = module(input)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/uchan/slowfast/MODELS/x3d.py", line 147, in forward
+    out = self.bn1(out)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/uchan/slowfast/MODELS/x3d.py", line 51, in forward
+    x = self.split_bn(x)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 135, in forward
+    return F.batch_norm(
+  File "/home/guest0/.conda/envs/uchanpython/lib/python3.8/site-packages/torch/nn/functional.py", line 2146, in batch_norm
+    return torch.batch_norm(
+RuntimeError: CUDA out of memory. Tried to allocate 66.00 MiB (GPU 0; 10.76 GiB total capacity; 9.17 GiB already allocated; 17.69 MiB free; 9.65 GiB reserved in total by PyTorch)
