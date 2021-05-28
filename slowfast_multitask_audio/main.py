@@ -20,6 +20,7 @@ from CONFIG.slowfast_multi_plot_multitask_audio import params
 #from CONFIG.slowfast_multi import params
 #from CONFIG.slowfast_multi_v2 import params
 from torch.backends import cudnn
+from adamp import SGDP
 #from activate import train, val
 from activate import train, val
 from torchtext.vocab import Vocab
@@ -181,9 +182,10 @@ def main():
     #optimizer = optim.SGD(model.parameters(), lr = params['learning_rate'], momentum = params['momentum'], weight_decay = params['weight_decay'])
     #scheduler = optim.lr_scheduler.StepLR(optimizer,  step_size = params['step'], gamma=0.1)
 
-    optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
-
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 1, factor = 0.5, verbose=False)
+    #optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
+    #optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
+    optimizer = SGDP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], momentum=params['momentum'], nesterov=True)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 5, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):

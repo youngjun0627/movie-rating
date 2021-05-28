@@ -185,7 +185,7 @@ class VideoDataset(Dataset):
             weight = 1.0 / weight
             weight = weight / weight.sum()
             return weight
-        elif self.label_num==4:
+        elif self.label_num==5:
             weights = []
             for i in range(self.label_num):
                 weights.append([0 for _ in range(self.sub_classnum)])
@@ -235,6 +235,7 @@ class VideoDataset(Dataset):
                     weights[i][k]=v
                 weights[i] = torch.tensor(weights[i])
                 weights[i] = torch.tensor([1/(x/sum(weights[i])) for x in weights[i]])
+                weights[i] /= torch.max(weights[i])
             return torch.stack(weights)
     
     def get_age_weight2(self):
@@ -249,6 +250,7 @@ class VideoDataset(Dataset):
             weights[k]=v
         weights = torch.tensor(weights)
         weights = torch.tensor([1/(x/sum(weights)) for x in weights])
+        weights /= torch.max(weights)
         return weights
 
     def normalize(self, img):
@@ -262,9 +264,9 @@ if __name__=='__main__':
     
 
     
-    transform = create_train_transform(True,True,True,True,size=112)
+    transform = create_train_transform(True,True,True,True,size=224)
     path = '/home/uchanlee/uchanlee/uchan/slowfast_multitask_audio/UTILS'
-    a = VideoDataset(path, transform = transform, size=112,label_num=5, use_plot=True)
+    a = VideoDataset(path, transform = transform, size=224,label_num=5, use_plot=True)
     
     plots = a.plots
     counter = Counter()
@@ -273,7 +275,63 @@ if __name__=='__main__':
         counter.update(tokenizer(plot))
     vocab = Vocab(counter,min_freq=1)
     a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_class_weight())
     print(a.get_class_weight2())
+    print(a.get_age_weight())
+    #print(a[0][0])
+    '''
+    r_mean=0
+    r_std=0
+    b_mean=0
+    b_std=0
+    g_mean=0
+    g_std=0
+    for b in a:
+        data = b[0]
+        r_mean += (data[0,:,:,:]/255.0).mean()
+        r_std += (data[0,:,:,:]/255.0).std()
+        g_mean += (data[1,:,:,:]/255.0).mean()
+        g_std += (data[1,:,:,:]/255.0).std()
+        b_mean += (data[2,:,:,:]/255.0).mean()
+        b_std += (data[2,:,:,:]/255.0).std()
+    
+    print(r_mean/len(a), r_std/len(a))
+    print(g_mean/len(a), g_std/len(a))
+    print(b_mean/len(a), b_std/len(a))
+
+
+
+    a = VideoDataset(path, transform = transform, size=224,label_num=5, use_plot=True, mode='validation')
+    
+    plots = a.plots
+    counter = Counter()
+    tokenizer = get_tokenizer('basic_english')
+    for plot in plots:
+        counter.update(tokenizer(plot))
+    vocab = Vocab(counter,min_freq=1)
+    a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_class_weight())
+    print(a.get_class_weight2())
+    print(a.get_age_weight())
+    r_mean=0
+    r_std=0
+    b_mean=0
+    b_std=0
+    g_mean=0
+    g_std=0
+    for b in a:
+        data = b[0]
+        r_mean += (data[0,:,:,:]/255.0).mean()
+        r_std += (data[0,:,:,:]/255.0).std()
+        g_mean += (data[1,:,:,:]/255.0).mean()
+        g_std += (data[1,:,:,:]/255.0).std()
+        b_mean += (data[2,:,:,:]/255.0).mean()
+        b_std += (data[2,:,:,:]/255.0).std()
+    
+    print(r_mean/len(a), r_std/len(a))
+    print(g_mean/len(a), g_std/len(a))
+    print(b_mean/len(a), b_std/len(a))
+    '''
     '''
     print(a[100][0].shape)
     b = torch.tensor(a[0][0])

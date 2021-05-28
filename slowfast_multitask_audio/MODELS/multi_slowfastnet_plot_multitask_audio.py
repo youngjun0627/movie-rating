@@ -52,7 +52,7 @@ class Bottleneck(nn.Module):
         return out
 
 class SlowFast(nn.Module):
-    def __init__(self, block = Bottleneck, layers=[3,5,7,3], class_num=4, label_num = 5, dropout=0.5, mode='multi', vocab_size = 0):
+    def __init__(self, block = Bottleneck, layers=[3,5,11,7], class_num=4, label_num = 5, dropout=0.5, mode='multi', vocab_size = 0):
         super(SlowFast, self).__init__()
         self.mode = mode
         self.embed_dim = 64
@@ -260,7 +260,7 @@ class SlowFast(nn.Module):
         return nn.Sequential(*layers)
 
 def resnet50(**kwargs):
-    model = SlowFast(Bottleneck,[3,4,6,3],**kwargs)
+    model = SlowFast(Bottleneck,[3,5,11,7],**kwargs)
     return model
 
 def resnet101(**kwargs):

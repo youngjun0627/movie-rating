@@ -16,10 +16,7 @@ def create_train_transform(flip,
     
     translist = []
     if resize:
-        if size==112:
-            translist+=[albumentations.Resize(128,128)]
-        elif size==224:
-            translist+=[albumentations.Resize(256,256)]
+        translist+=[albumentations.Resize(size+30, size+30)]
         translist+=[albumentations.RandomCrop(size,size,always_apply=True)]
     if flip:
         translist+=[albumentations.OneOf([
@@ -38,10 +35,10 @@ def create_train_transform(flip,
     if cutout:
         translist+=[albumentations.Cutout(max_h_size = int(size*0.1), max_w_size=int(size*0.1), num_holes=1,p=0.5)]
 
-    translist+=[albumentations.Normalize(mean=(0.45, 0.45, 0.45), std = (0.225, 0.225, 0.225))]
     #translist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
+    #translist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
     #trainlist+=[albumentations.Normalize(mean=(0.2539, 0.2348, 0.2189), std = (0.2195,0.2110,0.2061))]
-    #translist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
+    translist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
 
     #translist+=[albumentations.Normalize(mean=(0.2527, 0.2343, 0.2177), std = (0.2171, 0.2082, 0.2026))]
     transform = albumentations.Compose(translist)
@@ -52,8 +49,9 @@ def create_val_transform(resize,size=112):
     if resize:
         vallist+=[albumentations.Resize(size,size)]
 
-    vallist+=[albumentations.Normalize(mean=(0.45, 0.45, 0.45), std = (0.225, 0.225, 0.225))]
-    #vallist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
+    #vallist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
+    #vallist+=[albumentations.Normalize(mean=(0.45, 0.45, 0.45), std = (0.225, 0.225, 0.225))]
+    vallist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
     #vallist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
     #vallist+=[albumentations.Normalize(mean=(0.2597, 0.2405, 0.2231), std = (0.2276,0.2196,0.2160))]
     transform = albumentations.Compose(vallist)

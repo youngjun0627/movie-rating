@@ -121,7 +121,6 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                     print_string = 'Label {label_name} -> F1_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
                     #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                     print(print_string)
-                    print(pred)
                 
                 score = f1_score(np.array(age_targets), np.array(age_preds), average = 'macro')
                 print_string = '{label_name} -> F1_score : {metric:.5f}'.format(label_name='Age', metric=score)
