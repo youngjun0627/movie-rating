@@ -20,20 +20,22 @@ def create_train_transform(flip,
         translist+=[albumentations.RandomCrop(size,size,always_apply=True)]
     if flip:
         translist+=[albumentations.OneOf([
-                albumentations.HorizontalFlip()],p=0.5)]
+                albumentations.Rotate(limit=45),
+                albumentations.HorizontalFlip()],p=0.7)]
 
     if noise:
         translist+=[albumentations.OneOf([
             albumentations.MotionBlur(blur_limit=5),
             albumentations.MedianBlur(blur_limit=5),
             albumentations.OpticalDistortion(),
-            albumentations.GaussNoise(var_limit=(5.0,20.0))], p=0.65)]
+            albumentations.GaussianBlur(),
+            albumentations.GaussNoise(var_limit=(5.0,20.0))], p=0.75)]
 
     if bright:
-        translist+=[albumentations.RandomBrightness(limit=0.2, always_apply=False)]
+        translist+=[albumentations.RandomBrightness(limit=0.2, always_apply=False,p=0.7)]
 
     if cutout:
-        translist+=[albumentations.Cutout(max_h_size = int(size*0.1), max_w_size=int(size*0.1), num_holes=1,p=0.5)]
+        translist+=[albumentations.Cutout(max_h_size = int(size*0.1), max_w_size=int(size*0.1), num_holes=3,p=0.65)]
 
     #translist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
     #translist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]

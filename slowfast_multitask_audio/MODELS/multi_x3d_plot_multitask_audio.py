@@ -252,7 +252,9 @@ class ResNet(nn.Module):
             self.avgpool = nn.AdaptiveAvgPool3d((None, 1, 1))
         self.fc1 = nn.Conv3d(block_inplanes[3][0], 2048, bias=False, kernel_size=1, stride=1)
         self.fcs = nn.ModuleList([nn.Linear(2048+embed_dim+self.audio_size, n_classes) for _ in range(label_num)])
-        self.classifier = nn.Linear(2048+embed_dim+self.audio_size, n_classes * label_num)
+        self.classifier = nn.Sequential(
+                                        nn.Linear(2048+embed_dim+self.audio_size, 256),\
+                                        nn.Linear(256, n_classes * label_num))
         self.dropout = nn.Dropout(dropout)
 
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim)

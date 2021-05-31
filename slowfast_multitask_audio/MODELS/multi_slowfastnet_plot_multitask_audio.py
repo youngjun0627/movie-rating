@@ -80,15 +80,17 @@ class SlowFast(nn.Module):
         self.slow_bn1 = nn.BatchNorm3d(64)
         self.slow_relu = nn.ReLU(inplace=True)
         self.slow_maxpool = nn.MaxPool3d(kernel_size=(1,3,3), stride=(1,2,2), padding=(0,1,1))
-        self.slow_res2 = self._make_layer_slow(block, 64, layers[0], head_conv=1)
+        self.slow_res2 = self._make_layer_slow(block, 64, layers[0], head_conv=3)
         self.slow_res3 = self._make_layer_slow(block, 128, layers[1], stride=2,head_conv=3)
         self.slow_res4 = self._make_layer_slow(block, 256, layers[2],stride=2,head_conv=3)
         self.slow_res5 = self._make_layer_slow(block,512,layers[3], stride=2, head_conv=3)
         
         self.dp = nn.Dropout(dropout)
 
-        #self.fcs = nn.ModuleList([nn.Linear(self.fast_inplanes+2048, class_num) for _ in range(label_num)])
-        self.classifier = nn.Linear(self.fast_inplanes + 2048 + self.embed_dim + self.audio_size, class_num * label_num)
+        self.classifier1 = nn.ModuleList([nn.Linear(self.fast_inplanes+2048+self.embed_dim+self.audio_size, 256) for _ in range(label_num)])
+        self.classifier2 = nn.ModuleList([nn.Linear(256, class_num) for _ in range(label_num)])
+        
+        #self.classifier = nn.Linear(self.fast_inplanes + 2048 + self.embed_dim + self.audio_size, class_num * label_num)
         # text #
         self.embedding = nn.EmbeddingBag(vocab_size, self.embed_dim)
         self.textfc1 = nn.Linear(self.embed_dim, self.embed_dim)
@@ -118,9 +120,11 @@ class SlowFast(nn.Module):
         self.textfc1.weight.data.uniform_(-initrange, initrange)
         self.textfc1.bias.data.zero_()
 
+    
+
     def forward(self, input, text, offset, audio):
-        fast, lateral = self.FastPath(input[:,:,::2,:,:])
-        slow = self.SlowPath(input[:,:,::16,:,:],lateral)
+        fast, lateral = self.FastPath(input[:,:,::1,:,:])
+        slow = self.SlowPath(input[:,:,::8,:,:],lateral)
         video = torch.cat([slow,fast],dim=1)
         text = self.embedding(text,offset)
         text = self.textfc1(text)
@@ -128,8 +132,16 @@ class SlowFast(nn.Module):
         audio = audio.view(audio.shape[0], -1)
         features = torch.cat([video, text, audio], dim=1)
         features = self.dp(features)
+        # method 1
+        outputs = []
+        for fc1, fc2 in zip(self.classifier1, self.classifier2):
+            outputs.append(fc2(self.dp(fc1(features))))
+        outputs = torch.stack(outputs)
+        '''
+        # method 2
         outputs = self.classifier(features)
         outputs = outputs.view(self.label_num, -1, self.class_num)
+        '''
         genre = self.genrefc(features)
         age = self.agefc(features)
         return outputs, genre, age
@@ -260,12 +272,32 @@ class SlowFast(nn.Module):
         return nn.Sequential(*layers)
 
 def resnet50(**kwargs):
-    model = SlowFast(Bottleneck,[3,5,11,7],**kwargs)
+    model = SlowFast(Bottleneck,[3,4,6,3],**kwargs)
     return model
 
 def resnet101(**kwargs):
     model = SlowFast(Bottleneck, [3,4,23,3], **kwargs)
     return model
+
+def c2_msra_fill(module: nn.Module) -> None:
+    nn.init.kaiming_normal_(module.weight, mode="fan_out", nonlinearity='relu')
+    if module.bias is not None:
+        nn.init.constant_(module.bias, 0)
+
+def init_weights(model, fc_init_std=0.01, zero_init_final_bn=True):
+    for m in model.modules():
+        if isinstance(m, nn.Conv3d):
+            c2_msra_fill(m)
+        elif isinstance(m, nn.BatchNorm3d):
+            batchnorm_weight=1.0
+            if m.weight is not None:
+                m.weight.data.fill_(batchnorm_weight)
+            if m.bias is not None:
+                m.bias.data.zero_()
+        if isinstance(m, nn.Linear):
+            m.weight.data.normal_(mean=0.0, std = fc_init_std)
+            if m.bias is not None:
+                m.bias.data.zero_()
 
 if __name__=='__main__':
     print(torch.__version__)

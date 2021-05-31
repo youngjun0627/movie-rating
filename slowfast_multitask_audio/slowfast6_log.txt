@@ -1,16 +1,21 @@
-Traceback (most recent call last):
-  File "main.py", line 10, in <module>
-    from DATASET.dataset import VideoDataset
-  File "/home/uchanlee/uchanlee/uchan/slowfast_multitask_audio/DATASET/dataset.py", line 7, in <module>
-    from TRANSFORMS.transform import create_train_transform, create_val_transform
-ModuleNotFoundError: No module named 'TRANSFORMS'
-108484
+57025
 1.7.1
 Loading dataset
 {0: {1: 376, 0: 205, 3: 68, 2: 196}, 1: {0: 94, 2: 304, 1: 272, 3: 175}, 2: {0: 93, 1: 327, 2: 260, 3: 165}, 3: {1: 525, 0: 117, 2: 159, 3: 44}, 4: {0: 133, 2: 328, 1: 250, 3: 134}}
 {0: {0: 64, 2: 69, 1: 122, 3: 36}, 1: {1: 79, 3: 83, 2: 103, 0: 26}, 2: {0: 25, 3: 67, 2: 88, 1: 111}, 3: {1: 154, 2: 75, 0: 40, 3: 22}, 4: {1: 78, 3: 59, 2: 109, 0: 45}}
-train_dataset : batch_size -> 4, step_size -> 212, frames -> 1024
-validation_dataset : batch_size -> 4, step_size -> 73, frames -> 1024
+train_dataset : batch_size -> 8, step_size -> 106, frames -> 1024
+validation_dataset : batch_size -> 8, step_size -> 37, frames -> 1024
 =========================================================================================================
 Load model : mode -> multi, label_size -> 5, sub_class_num -> 4
 train gogosing
+----------------------------------------------
+lr : 0.001
+Epoch:[1] step : [100/106]
+data_time: 0.090, batch_time: 2.805
+Loss : 4.17743
+Label sex_nudity -> F1_score : 0.10955
+Label violence_gore -> F1_score : 0.15626
+Label profinancy -> F1_score : 0.14499
+Label alcohol_drugs_smoking -> F1_score : 0.07694
+Label frightening_intense_scene -> F1_score : 0.20569
+Age -> F1_score : 0.20014

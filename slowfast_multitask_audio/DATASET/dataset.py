@@ -234,8 +234,7 @@ class VideoDataset(Dataset):
                 for k,v in weight.items():
                     weights[i][k]=v
                 weights[i] = torch.tensor(weights[i])
-                weights[i] = torch.tensor([1/(x/sum(weights[i])) for x in weights[i]])
-                weights[i] /= torch.max(weights[i])
+                weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])
             return torch.stack(weights)
     
     def get_age_weight2(self):
@@ -249,8 +248,7 @@ class VideoDataset(Dataset):
         for k,v in dic.items():
             weights[k]=v
         weights = torch.tensor(weights)
-        weights = torch.tensor([1/(x/sum(weights)) for x in weights])
-        weights /= torch.max(weights)
+        weights = torch.tensor([sum(weights)/(x*self.sub_classnum) for x in weights])
         return weights
 
     def normalize(self, img):

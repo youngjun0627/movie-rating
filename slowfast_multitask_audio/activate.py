@@ -71,7 +71,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         loss1 = criterion1(outputs, labels)
         loss2 = criterion2(genre, genre_labels)
         loss3 = criterion3(age, age_labels)
-        loss = loss1+loss2+loss3
+        loss = (2*loss1)+(loss2*0.5)+(loss3*0.5)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -178,7 +178,7 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             loss1 = criterion1(outputs, labels)
             loss2 = criterion2(genre, genre_labels)
             loss3 = criterion3(age, age_labels)
-            loss = loss1+loss2+loss3
+            loss = (2*loss1)+(loss2*0.5)+(loss3*0.5)
             #print(loss.item())
             running_loss+=loss.item()
             #print(outputs.shape, labels.shape)
