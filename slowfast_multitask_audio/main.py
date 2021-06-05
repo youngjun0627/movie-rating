@@ -15,7 +15,10 @@ from tensorboardX import SummaryWriter
 #from CONFIG.x3d_single import params
 #from CONFIG.x3d_multi import params
 #from CONFIG.x3d_multi_plot import params
+
 from CONFIG.slowfast_multi_plot_multitask_audio import params
+#from CONFIG.x3d_multi_plot_multitask_audio import params
+
 #from CONFIG.efficientnet3D_b0_multi import params
 #from CONFIG.efficientnet3D_b2_multi import params
 #from CONFIG.slowfast_multi import params
@@ -184,11 +187,14 @@ def main():
     #scheduler = optim.lr_scheduler.StepLR(optimizer,  step_size = params['step'], gamma=0.1)
 
     #optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
-    #optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
-    optimizer = SGDP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], momentum=params['momentum'], nesterov=True)
+    optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
+
+    #optimizer = optim.SGDW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
+    #optimizer = SGDP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], momentum=params['momentum'], nesterov=True)
     #optimizer = AdamP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], betas = (0.9, 0.999))
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 5, factor = 0.5, verbose=False)
+    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 5, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
+    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=1, eta_min = 0.00001)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)
@@ -214,8 +220,9 @@ def main():
             print('Total F1_score : {metrics:.5f}'.format(metrics = metric))
             print('======================================================')
 
-            scheduler.step(metric)
-        #scheduler.step()
+            #scheduler.step(metric)
+
+        scheduler.step()
 
     writer.close()
 

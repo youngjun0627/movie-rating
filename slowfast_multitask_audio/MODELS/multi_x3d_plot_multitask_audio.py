@@ -252,13 +252,16 @@ class ResNet(nn.Module):
             self.avgpool = nn.AdaptiveAvgPool3d((None, 1, 1))
         self.fc1 = nn.Conv3d(block_inplanes[3][0], 2048, bias=False, kernel_size=1, stride=1)
         self.fcs = nn.ModuleList([nn.Linear(2048+embed_dim+self.audio_size, n_classes) for _ in range(label_num)])
+        '''
         self.classifier = nn.Sequential(
                                         nn.Linear(2048+embed_dim+self.audio_size, 256),\
                                         nn.Linear(256, n_classes * label_num))
+        '''
+        self.classifier = nn.Linear(2048+embed_dim+self.audio_size, n_classes * label_num)
         self.dropout = nn.Dropout(dropout)
 
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim)
-        self.textfc1 = nn.Linear(embed_dim, embed_dim)
+        #self.textfc1 = nn.Linear(embed_dim, embed_dim)
         self.text_init_weights()
 
         self.genrefc = nn.Linear(2048+embed_dim+self.audio_size, 9)
@@ -289,8 +292,8 @@ class ResNet(nn.Module):
     def text_init_weights(self):
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.textfc1.weight.data.uniform_(-initrange, initrange)
-        self.textfc1.bias.data.zero_()
+        #self.textfc1.weight.data.uniform_(-initrange, initrange)
+        #self.textfc1.bias.data.zero_()
 
     def _downsample_basic_block(self, x, planes, stride):
         out = F.avg_pool3d(x, kernel_size=1, stride=stride)
@@ -377,8 +380,8 @@ class ResNet(nn.Module):
         x = self.fc1(x)
         #x = self.relu(x)
 
-        text = self.embedding(text, offset)
-        text = self.textfc1(text)
+        text = F.relu(self.embedding(text, offset))
+        #text = self.textfc1(text)
 
         audio = self.extract_audio(audio)
         audio = audio.view(audio.shape[0], -1)

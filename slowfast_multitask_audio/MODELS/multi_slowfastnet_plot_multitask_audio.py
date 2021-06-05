@@ -87,13 +87,14 @@ class SlowFast(nn.Module):
         
         self.dp = nn.Dropout(dropout)
 
-        self.classifier1 = nn.ModuleList([nn.Linear(self.fast_inplanes+2048+self.embed_dim+self.audio_size, 256) for _ in range(label_num)])
-        self.classifier2 = nn.ModuleList([nn.Linear(256, class_num) for _ in range(label_num)])
+        self.classifier1 = nn.ModuleList([nn.Linear(self.fast_inplanes+2048+self.embed_dim+self.audio_size, class_num) for _ in range(label_num)])
+        #self.classifier2 = nn.ModuleList([nn.Linear(256, class_num) for _ in range(label_num)])
         
         #self.classifier = nn.Linear(self.fast_inplanes + 2048 + self.embed_dim + self.audio_size, class_num * label_num)
         # text #
         self.embedding = nn.EmbeddingBag(vocab_size, self.embed_dim)
-        self.textfc1 = nn.Linear(self.embed_dim, self.embed_dim)
+        #self.textfc1 = nn.Linear(self.embed_dim, self.embed_dim)
+        #self.textfc2 = nn.Linear(self.embed_dim, self.embed_dim)
         self.text_init_weights()
 
         # genre fc, age fc #
@@ -117,8 +118,10 @@ class SlowFast(nn.Module):
     def text_init_weights(self):
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.textfc1.weight.data.uniform_(-initrange, initrange)
-        self.textfc1.bias.data.zero_()
+        #self.textfc1.weight.data.uniform_(-initrange, initrange)
+        #self.textfc1.bias.data.zero_()
+        #self.textfc2.weight.data.uniform_(-initrange, initrange)
+        #self.textfc2.bias.data.zero_()
 
     
 
@@ -127,15 +130,15 @@ class SlowFast(nn.Module):
         slow = self.SlowPath(input[:,:,::8,:,:],lateral)
         video = torch.cat([slow,fast],dim=1)
         text = self.embedding(text,offset)
-        text = self.textfc1(text)
+        text = F.relu(text)
         audio = self.extract_audio(audio)
         audio = audio.view(audio.shape[0], -1)
         features = torch.cat([video, text, audio], dim=1)
         features = self.dp(features)
         # method 1
         outputs = []
-        for fc1, fc2 in zip(self.classifier1, self.classifier2):
-            outputs.append(fc2(self.dp(fc1(features))))
+        for fc in self.classifier1:
+            outputs.append(fc(features))
         outputs = torch.stack(outputs)
         '''
         # method 2
@@ -272,7 +275,7 @@ class SlowFast(nn.Module):
         return nn.Sequential(*layers)
 
 def resnet50(**kwargs):
-    model = SlowFast(Bottleneck,[3,4,6,3],**kwargs)
+    model = SlowFast(Bottleneck,[3,10,23,7],**kwargs)
     return model
 
 def resnet101(**kwargs):

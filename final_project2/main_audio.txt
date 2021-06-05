@@ -1,0 +1,43 @@
+119632
+1.7.1
+Loading dataset
+{0: {1: 376, 0: 205, 3: 68, 2: 196}, 1: {0: 94, 2: 304, 1: 272, 3: 175}, 2: {0: 93, 1: 327, 2: 260, 3: 165}, 3: {1: 525, 0: 117, 2: 159, 3: 44}, 4: {0: 133, 2: 328, 1: 250, 3: 134}}
+{0: {0: 64, 2: 69, 1: 122, 3: 36}, 1: {1: 79, 3: 83, 2: 103, 0: 26}, 2: {0: 25, 3: 67, 2: 88, 1: 111}, 3: {1: 154, 2: 75, 0: 40, 3: 22}, 4: {1: 78, 3: 59, 2: 109, 0: 45}}
+train_dataset : batch_size -> 16, step_size -> 53, frames -> 1024
+validation_dataset : batch_size -> 16, step_size -> 19, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 5, sub_class_num -> 4
+train gogosing
+----------------------------------------------
+lr : 0.01
+Epoch:[1] step : [50/53]
+data_time: 5.486, batch_time: 6.845
+Loss : 3.25825
+Label sex_nudity -> F1_score : 0.23691
+Label violence_gore -> F1_score : 0.21843
+Label profinancy -> F1_score : 0.23549
+Label alcohol_drugs_smoking -> F1_score : 0.22954
+Label frightening_intense_scene -> F1_score : 0.25018
+Age -> F1_score : 0.27566
+----------------------------------------------
+lr : 0.01
+Epoch:[2] step : [50/53]
+data_time: 3.405, batch_time: 4.774
+Loss : 2.69907
+Label sex_nudity -> F1_score : 0.22190
+Label violence_gore -> F1_score : 0.19728
+Label profinancy -> F1_score : 0.22459
+Label alcohol_drugs_smoking -> F1_score : 0.24044
+Label frightening_intense_scene -> F1_score : 0.18710
+Age -> F1_score : 0.24121
+----------------------------------------------
+lr : 0.01
+Epoch:[3] step : [50/53]
+data_time: 1.492, batch_time: 2.859
+Loss : 2.55794
+Label sex_nudity -> F1_score : 0.21410
+Label violence_gore -> F1_score : 0.21001
+Label profinancy -> F1_score : 0.22251
+Label alcohol_drugs_smoking -> F1_score : 0.23263
+Label frightening_intense_scene -> F1_score : 0.20924
+Age -> F1_score : 0.26262
