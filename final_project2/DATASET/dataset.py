@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
+from PIL import Image
 import csv
 import albumentations
 from .TRANSFORMS.transform import create_train_transform, create_val_transform
@@ -58,8 +59,6 @@ class VideoDataset(Dataset):
                 else: 
                     labels = []     
                     for _idx, label in enumerate(data[2:7]):
-                        if _idx==3:
-                            continue
                         label = self.convert_label(label)
                         labels.append(label)
                         
@@ -92,10 +91,10 @@ class VideoDataset(Dataset):
                 dic[_label]+=1
             self.class_weight = dic
         else:
-            #label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'drug_smoking', 4: 'frighten'}
+            label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'drug_smoking', 4: 'frighten'}
             #dic = {0:{}, 1: {}, 2:{}, 3:{}, 4:{}}
-            label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'frighten'}
-            dic = {0:{}, 1: {}, 2:{}, 3:{}}
+            #label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'frighten'}
+            dic = {0:{}, 1: {}, 2:{}, 3:{}, 4:{}}
             for _labels in self.labels:
                 for i, _label in enumerate(_labels):
                     if _label not in dic[i]:
@@ -108,9 +107,16 @@ class VideoDataset(Dataset):
         video_path = self.filenames[index]
         frame_length = self.frame_lengths[index]
 
-        frame_indices = np.arange(self.cut_time, frame_length-30, (frame_length-self.cut_time-30)/self.play_time)
-        frame_indices = list(map(int, frame_indices))
-        frame_indices = frame_indices[:1024]
+        if self.mode=='train':
+            frame_indices = np.linspace(self.cut_time, frame_length-20, self.play_time+1)
+            frame_indices = list(map(int, frame_indices))
+            candidate = frame_indices[:]
+            frame_indices = []
+            for i in range(self.play_time):
+                frame_indices.append(random.randrange(candidate[i], candidate[i+1]))
+        elif self.mode=='validation':
+            frame_indices = np.linspace(self.cut_time, frame_length-20, self.play_time)
+            frame_indices = list(map(int, frame_indices))
         video = self.load_clip_video(video_path, frame_indices)
         label = self.labels[index]
         #print(type(video), type(label))
@@ -122,17 +128,21 @@ class VideoDataset(Dataset):
 
             #mfccs = librosa.feature.mfcc(y=sig, sr=sr, hop_length=160, n_mfcc=40, n_fft=2048)
             #mfccs = cv2.imread(self.audios[index], cv2.IMREAD_GRAYSCALE)
-            mfccs = np.load(self.audios[index])
+            #mfccs = np.load(self.audios[index])
             #_, audio_length = mfccs.shape
             #audio_start = audio_length * start // frame_length
             #audio_end = (audio_length * (start + self.play_time))// frame_length
-            mfccs = mfccs[:,frame_indices]
+            #mfccs = mfccs[:,frame_indices]
             #mfccs = sklearn.preprocessing.scale(mfccs, axis=1)
-            mfccs = self.pad2d(mfccs, 4400)
+            #mfccs = self.pad2d(mfccs, 4400)
             #mfccs = preprocessing.scale(np.array(mfccs).astype('float'))
+            mfccs = np.load(self.audios[index]).astype('uint8')
+            mfccs = Image.fromarray(mfccs).resize((4400,40))
             mfccs = np.array(mfccs).astype('float')
+            if self.mode=='train':
+                mfccs += 0.005 * np.random.randn(40,4400)
             mfccs = np.expand_dims(mfccs, axis=0)
-            return video, plot, np.array([label]), self.sub_labels[index][0], np.array(self.sub_labels[index][1]), mfccs
+            return video, plot, np.array(label), self.sub_labels[index][0], np.array(self.sub_labels[index][1]), mfccs
         else:
             #return video, np.array(label), np.array([self.sub_labels[index][0]]), np.array(self.sub_labels[index][1])
             return video, np.array(label)
@@ -149,7 +159,6 @@ class VideoDataset(Dataset):
             random.seed(seed)
             image_path = os.path.join(video_path, 'frame_{:05d}.jpg'.format(i))
             img = cv2.imread(image_path, cv2.IMREAD_COLOR)
-            img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
             if self.transform:
                 img = self.transform(image = img)['image']
             #img = self.normalize(img)
@@ -164,10 +173,10 @@ class VideoDataset(Dataset):
 
     def convert_label(self, label):
         if self.sub_classnum==4:
-            dic = {0:0,1:1,2:2,3:3}
+            dic = {0:0,1:0,2:1,3:1}
         elif self.sub_classnum==3:
             dic = {0:0,1:0,2:1,3:1,4:2,5:2}
-        elif self.sub_classnum==2:
+        elif self.sub_classnum==1:
             dic = {0:0,1:0,2:1,3:1}
         return dic[int(label)]
 
@@ -228,12 +237,12 @@ class VideoDataset(Dataset):
         elif self.label_num==5 or self.label_num==4:
             weights = []
             for i in range(self.label_num):
-                weights.append([0 for _ in range(self.sub_classnum)])
+                weights.append([0 for _ in range(self.sub_classnum+1)])
                 weight = self.class_weight[i]
                 for k,v in weight.items():
                     weights[i][k]=v
                 weights[i] = torch.tensor(weights[i])
-                weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])
+                weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])[1]
             return torch.stack(weights)
     
     def get_age_weight2(self):
@@ -263,7 +272,7 @@ if __name__=='__main__':
     
     transform = create_train_transform(True,True,True,True,size=112)
     path = '/home/uchanlee/uchanlee/uchan/final_project/UTILS'
-    a = VideoDataset(path, transform = transform, size=112,label_num=1, use_plot=True)
+    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=1, use_plot=False, mode='validation')
     
     plots = a.plots
     counter = Counter()
@@ -272,13 +281,32 @@ if __name__=='__main__':
         counter.update(tokenizer(plot))
     vocab = Vocab(counter,min_freq=1)
     a.generate_text_pipeline(vocab,tokenizer)
+    '''
+    r_mean = 0
+    r_std = 0
+    g_mean = 0
+    g_std = 0
+    b_mean = 0
+    b_std = 0
+    dataloader = DataLoader(a, batch_size=1)
+    for video, _ in dataloader:
+        r_mean += (video[:,0,:,:,:]/255.).mean()
+        r_std += (video[:,0,:,:,:]/255.).std()
+        g_mean += (video[:,1,:,:,:]/255.).mean()
+        g_std += (video[:,1,:,:,:]/255.).std()
+        b_mean += (video[:,2,:,:,:]/255.).mean()
+        b_std += (video[:,2,:,:,:]/255.).std()
+    print(r_mean/len(dataloader), g_mean/len(dataloader), b_mean/len(dataloader))
+    print(r_std/len(dataloader), g_std/len(dataloader), b_std/len(dataloader))
+    '''
+        
     #print(a.get_class_weight())
     print(a.get_class_weight2())
-    print(a.get_age_weight2())
+    #print(a.get_age_weight2())
     #print(a.get_age_weight())
     #for i in range(len(a.filenames)):
     #    print(i)
-
+    '''
     transform = create_val_transform(True, size=112)
     a = VideoDataset(path, transform = transform, size=112,label_num=1, use_plot=True, mode = 'validation')
     
@@ -291,6 +319,7 @@ if __name__=='__main__':
     a.generate_text_pipeline(vocab,tokenizer)
     print(a.get_class_weight2())
     print(a.get_age_weight2())
+    '''
     #print(a[0][0].shape)
     #for i in range(len(a.filenames)):
     #    print(i)

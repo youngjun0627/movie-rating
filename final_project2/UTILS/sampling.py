@@ -459,7 +459,7 @@ def convert5_csv(path,k):
         rare_cnt  = 1
         if frames_length>stand_length*1.1:
             sample_cnt+=1
-            if sample_cnt%5!=0:
+            if sample_cnt%3!=0:
                 '''
                 if additional_dic[moviename][0]==0: 
                     rare_cnt=2
@@ -527,7 +527,7 @@ if __name__=='__main__':
     #sampling(path)
 
     path = '/home/uchanlee/uchanlee/uchan_dataset/DATA4'
-    convert5_csv(path,3)
+    convert5_csv(path,2)
 
     #c=0
     #with open('./train-for_user.csv', 'r', encoding='utf-8-sig') as f:

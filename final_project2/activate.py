@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from MODELS import slowfastnet
 from tensorboardX import SummaryWriter
 from UTILS.metrics import custom_metric
-from sklearn.metrics import f1_score, precision_score
+from sklearn.metrics import f1_score, precision_score, roc_auc_score
 import torch.nn.functional as F
 
 class AverageMeter(object):
@@ -34,9 +34,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
     end = time.time()
     model.train()
     running_loss = 0
-    #label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'alcohol_drugs_smoking', 4:'frightening_intense_scene'}
-    #label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'frightening_intense_scene'}
-    label_dic = {0:'frightening_intense_scene'}
+    label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'alcohol_drugs_smoking', 4:'frightening_intense_scene'}
     preds=None
     targets = None
     if mode=='single':
@@ -68,11 +66,10 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         audio = audio.to(device)
 
         outputs, genre, age = model(inputs,text,offset, audio)
-
         loss1 = criterion1(outputs, labels)
         loss2 = criterion2(genre, genre_labels)
         loss3 = criterion3(age, age_labels)
-        loss = (2*loss1)+(loss2*0.5)+(loss3*0.5)
+        loss = loss1+loss2+loss3
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -86,7 +83,8 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
             elif mode=='multi':
                 labels=torch.transpose(labels, 0, 1) # B, L -> L, B
                 for idx, (output, label) in enumerate(zip(outputs, labels)):
-                    output = np.argmax(F.softmax(output, dim=1).cpu().detach().numpy(), axis=1)
+                    #output = np.argmax(F.softmax(output, dim=1).cpu().detach().numpy(), axis=1)
+                    output = torch.sigmoid(output).cpu().detach().numpy()
                     label = label.cpu().detach().numpy()
                     for pred, target in zip(output, label):
                         preds[idx].append(pred)
@@ -117,9 +115,10 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                 print_string = 'Loss : {loss:.5f}'.format(loss=running_loss/display)
                 print(print_string)
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
-                    score = f1_score(np.array(target), np.array(pred), average='macro')
+
+                    score = roc_auc_score(np.array(target), np.array(pred))
                     #precision = precision_score(np.array(target), np.array(pred), average='macro')
-                    print_string = 'Label {label_name} -> F1_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
+                    print_string = 'Label {label_name} -> auroc_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
                     #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                     print(print_string)
                 
@@ -143,9 +142,7 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
     losses = AverageMeter()
     model.eval()
     end = time.time()
-    #label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'alcohol_drugs_smoking', 4:'frightening_intense_scene'}
-    #label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'frightening_intense_scene'}
-    label_dic = {0:'frightening_intense_scene'}
+    label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'alcohol_drugs_smoking', 4:'frightening_intense_scene'}
     preds=None
     targets = None
     if mode=='single':
@@ -193,7 +190,8 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             elif mode=='multi':
                 labels=torch.transpose(labels, 0, 1) # B, L -> L, B
                 for idx, (output, label) in enumerate(zip(outputs, labels)):
-                    output = np.argmax(F.softmax(output, dim=1).cpu().detach().numpy(), axis=1)
+                    #output = np.argmax(F.softmax(output, dim=1).cpu().detach().numpy(), axis=1)
+                    output = torch.sigmoid(output).cpu().detach().numpy()
                     label = label.cpu().detach().numpy()
                     for pred, target in zip(output, label):
                         preds[idx].append(pred)
@@ -219,11 +217,11 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             print(print_string)
             result = 0 
             for idx, (pred, target) in enumerate(zip(preds, targets)):
-                score = f1_score(np.array(target), np.array(pred), average='macro')
+                score = roc_auc_score(np.array(target), np.array(pred))
                 result += score
                 #precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=1)
                 #result2 += precision
-                print_string = 'Label {label_name} -> F1_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
+                print_string = 'Label {label_name} -> auroc_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
 
                 #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                 print(print_string)

@@ -1,0 +1,67 @@
+44977
+1.7.1
+Loading dataset
+{0: {0: 470, 1: 222}, 1: {1: 405, 0: 287}, 2: {0: 340, 1: 352}, 3: {0: 506, 1: 186}, 4: {1: 383, 0: 309}}
+{0: {0: 235, 1: 111}, 1: {0: 143, 1: 203}, 2: {0: 163, 1: 183}, 3: {0: 261, 1: 85}, 4: {0: 150, 1: 196}}
+train_dataset : batch_size -> 4, step_size -> 173, frames -> 1024
+validation_dataset : batch_size -> 4, step_size -> 87, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 5, sub_class_num -> 1
+train gogosing
+----------------------------------------------
+lr : 0.001
+Epoch:[1] step : [140/173]
+data_time: 0.271, batch_time: 4.409
+Loss : 8.12654
+Label sex_nudity -> auroc_score : 0.47497
+Label violence_gore -> auroc_score : 0.44122
+Label profinancy -> auroc_score : 0.47928
+Label alcohol_drugs_smoking -> auroc_score : 0.47227
+Label frightening_intense_scene -> auroc_score : 0.47155
+Age -> F1_score : 0.23920
+----------------------------------------------
+lr : 0.001
+Epoch:[2] step : [140/173]
+data_time: 0.218, batch_time: 4.403
+Loss : 7.97244
+Label sex_nudity -> auroc_score : 0.48085
+Label violence_gore -> auroc_score : 0.55370
+Label profinancy -> auroc_score : 0.55634
+Label alcohol_drugs_smoking -> auroc_score : 0.52573
+Label frightening_intense_scene -> auroc_score : 0.56199
+Age -> F1_score : 0.17862
+----------------------------------------------
+lr : 0.001
+Epoch:[3] step : [140/173]
+data_time: 18.253, batch_time: 22.289
+Loss : 7.65222
+Label sex_nudity -> auroc_score : 0.50408
+Label violence_gore -> auroc_score : 0.56919
+Label profinancy -> auroc_score : 0.49537
+Label alcohol_drugs_smoking -> auroc_score : 0.50114
+Label frightening_intense_scene -> auroc_score : 0.52941
+Age -> F1_score : 0.23131
+----------------------------------------------
+lr : 0.001
+Epoch:[4] step : [140/173]
+data_time: 0.094, batch_time: 4.185
+Loss : 7.53668
+Label sex_nudity -> auroc_score : 0.51687
+Label violence_gore -> auroc_score : 0.53443
+Label profinancy -> auroc_score : 0.51440
+Label alcohol_drugs_smoking -> auroc_score : 0.49631
+Label frightening_intense_scene -> auroc_score : 0.55727
+Age -> F1_score : 0.21774
+----------------------------------------------
+lr : 0.001
+Epoch:[5] step : [140/173]
+data_time: 0.087, batch_time: 4.177
+Loss : 7.59266
+Label sex_nudity -> auroc_score : 0.50253
+Label violence_gore -> auroc_score : 0.60124
+Label profinancy -> auroc_score : 0.51645
+Label alcohol_drugs_smoking -> auroc_score : 0.50796
+Label frightening_intense_scene -> auroc_score : 0.57925
+Age -> F1_score : 0.19127
+======================================================
+validation gogosing

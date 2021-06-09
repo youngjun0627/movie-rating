@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 import csv
 import albumentations
-from .TRANSFORMS.transform import create_train_transform, create_val_transform
+from TRANSFORMS.transform import create_train_transform, create_val_transform
 from albumentations.pytorch.functional import img_to_tensor
 from sklearn import preprocessing
 import torch
@@ -281,6 +281,8 @@ if __name__=='__main__':
         counter.update(tokenizer(plot))
     vocab = Vocab(counter,min_freq=1)
     a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_class_weight())
+    '''
     r_mean = 0
     r_std = 0
     g_mean = 0
@@ -297,7 +299,7 @@ if __name__=='__main__':
         b_std += (video[:,2,:,:,:]/255.).std()
     print(r_mean/len(dataloader), g_mean/len(dataloader), b_mean/len(dataloader))
     print(r_std/len(dataloader), g_std/len(dataloader), b_std/len(dataloader))
-
+    '''
         
     #print(a.get_class_weight())
     #print(a.get_class_weight2())

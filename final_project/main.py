@@ -5,7 +5,7 @@ import torch
 import argparse
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from MODELS import slowfastnet, x3d, multi_slowfastnet, multi_x3d, efficientnet, multi_x3d_plot_multitask, multi_x3d_plot, multi_x3d_plot_multitask_audio, multi_slowfastnet_plot_multitask_audio
+from MODELS import slowfastnet, x3d, multi_slowfastnet, multi_x3d, efficientnet, multi_x3d_plot_multitask, multi_x3d_plot, multi_x3d_plot_multitask_audio, multi_slowfastnet_plot_multitask_audio, slowfast_lstm
 from MODELS.multi_slowfastnet_plot_multitask_audio import init_weights
 from UTILS.collate_batch import Collate_batch
 from DATASET.dataset import VideoDataset
@@ -103,7 +103,8 @@ def main():
         elif params['model']=='x3d':
             if params['use_plot']:
                 plots = train_dataset.plots
-                plots.extend(val_dataset.plots)
+                #plots.extend(val_dataset.plots)
+                plots = set(plots)
                 counter = Counter()
                 tokenizer = get_tokenizer('basic_english')
                 for plot in plots:
@@ -117,7 +118,8 @@ def main():
         elif params['model']=='x3d_multitask':
             if params['use_plot']:
                 plots = train_dataset.plots
-                plots.extend(val_dataset.plots)
+                #plots.extend(val_dataset.plots)
+                plots = list(set(plots))
                 counter = Counter()
                 tokenizer = get_tokenizer('basic_english')
                 for plot in plots:
@@ -131,7 +133,8 @@ def main():
         elif params['model']=='slowfast_multitask':
             if params['use_plot']:
                 plots = train_dataset.plots
-                plots.extend(val_dataset.plots)
+                #plots.extend(val_dataset.plots)
+                #plots = list(set(plots))
                 counter = Counter()
                 tokenizer = get_tokenizer('basic_english')
                 for plot in plots:
@@ -139,7 +142,7 @@ def main():
                 vocab = Vocab(counter,min_freq=1)
                 train_dataset.generate_text_pipeline(vocab,tokenizer)
                 val_dataset.generate_text_pipeline(vocab, tokenizer) 
-                model = multi_slowfastnet_plot_multitask_audio.resnet50(class_num=params['num_classes'], label_num = params['label_num'], mode = params['mode'], vocab_size = len(vocab))
+                model = slowfast_lstm.resnet50(class_num=params['num_classes'], label_num = params['label_num'], mode = params['mode'], vocab_size = len(vocab))
                 init_weights(model)
 
         elif params['model'] =='eff':
@@ -187,15 +190,15 @@ def main():
     #optimizer = optim.SGD(model.parameters(), lr = params['learning_rate'], momentum = params['momentum'], weight_decay = params['weight_decay'])
     #scheduler = optim.lr_scheduler.StepLR(optimizer,  step_size = params['step'], gamma=0.1)
 
-    #optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
-    optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
+    optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
+    #optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
 
     #optimizer = optim.SGDW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
     #optimizer = SGDP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], momentum=params['momentum'], nesterov=True)
     #optimizer = AdamP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], betas = (0.9, 0.999))
-    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 5, factor = 0.5, verbose=False)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 2, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
-    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=10, eta_max=0.005, T_up=10, gamma=0.5)
+    #scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=10, eta_max=0.01, T_up=10, gamma=0.5)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)
@@ -221,9 +224,9 @@ def main():
             print('Total F1_score : {metrics:.5f}'.format(metrics = metric))
             print('======================================================')
 
-            #scheduler.step(metric)
+            scheduler.step(metric)
 
-        scheduler.step()
+        #scheduler.step()
 
     writer.close()
 

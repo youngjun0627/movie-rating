@@ -70,7 +70,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         loss1 = criterion1(outputs, labels)
         loss2 = criterion2(genre, genre_labels)
         loss3 = criterion3(age, age_labels)
-        loss = (2*loss1)+(loss2*0.5)+(loss3*0.5)
+        loss = loss1+loss2+loss3
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -115,6 +115,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                 print_string = 'Loss : {loss:.5f}'.format(loss=running_loss/display)
                 print(print_string)
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
+
                     score = f1_score(np.array(target), np.array(pred), average='macro')
                     #precision = precision_score(np.array(target), np.array(pred), average='macro')
                     print_string = 'Label {label_name} -> F1_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
@@ -215,6 +216,10 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             print(print_string)
             result = 0 
             for idx, (pred, target) in enumerate(zip(preds, targets)):
+### TODO
+                for i in range(4):
+                    TP = np.where(np.array(pred)==np.array(target))
+                    FP = 
                 score = f1_score(np.array(target), np.array(pred), average='macro')
                 result += score
                 #precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=1)
