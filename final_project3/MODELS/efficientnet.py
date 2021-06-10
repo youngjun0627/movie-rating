@@ -110,14 +110,17 @@ class EfficientNet3D(nn.Module):
 
     """
 
-    def __init__(self, blocks_args=None, global_params=None, in_channels=3, mode = 'single', label_num=1):
+    def __init__(self, blocks_args=None, global_params=None, in_channels=3, mode = 'single', class_num=4, label_num=4, vocab_size = 0):
         super().__init__()
         assert isinstance(blocks_args, list), 'blocks_args should be a list'
         assert len(blocks_args) > 0, 'block args must be greater than 0'
         self._global_params = global_params
         self._blocks_args = blocks_args
         self.mode = mode
-
+        self.embed_dim = 64
+        self.audio_size = 1024
+        self.label_num = label_num
+        self.num_classes = class_num
         # Get static or dynamic convolution depending on image size
         Conv3d = get_same_padding_conv3d(image_size=global_params.image_size)
 
@@ -157,11 +160,53 @@ class EfficientNet3D(nn.Module):
         # Final linear layer
         self._avg_pooling = nn.AdaptiveAvgPool3d(1)
         self._dropout = nn.Dropout(self._global_params.dropout_rate)
-        if mode=='single':
-            self._fc = nn.Linear(out_channels, self._global_params.num_classes)
-        elif mode =='multi':
-            self._fc = nn.ModuleList([nn.Linear(out_channels, self._global_params.num_classes) for _ in range(label_num)])
         self._swish = MemoryEfficientSwish()
+
+
+        self.classifier1 = nn.ModuleList([nn.Linear(256*32+self.embed_dim+self.audio_size, self.num_classes) for _ in range(self.label_num)])
+        # text #
+        self.embedding = nn.EmbeddingBag(vocab_size, self.embed_dim)
+        self.text_init_weights()
+
+        # genre fc, age fc #
+        self.genrefc = nn.Linear(256*32 + self.embed_dim + self.audio_size, 9)
+        self.agefc = nn.Linear(256*32 + self.embed_dim + self.audio_size, 4)
+
+
+        self.extract_audio = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
+                                        nn.BatchNorm2d(32),\
+                                        nn.LeakyReLU(),\
+                                        nn.MaxPool2d(2),\
+                                        nn.Conv2d(32, 64, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
+                                        nn.BatchNorm2d(64),\
+                                        nn.LeakyReLU(),\
+                                        nn.MaxPool2d(2),\
+                                        nn.Conv2d(64, 128, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
+                                        nn.BatchNorm2d(128),\
+                                        nn.LeakyReLU(),\
+                                        nn.MaxPool2d(2),\
+                                        nn.Conv2d(128, 256, kernel_size=(3,11), stride=(1,3), padding=(1,1)),\
+                                        nn.AdaptiveAvgPool2d(2)\
+                                        )
+
+        self.lstm = nn.LSTM(1280, hidden_size = 256, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.3) 
+
+
+    def text_init_weights(self):
+        initrange = 0.5
+        self.embedding.weight.data.uniform_(-initrange, initrange)
+        #self.textfc1.weight.data.uniform_(-initrange, initrange)
+        #self.textfc1.bias.data.zero_()
+        #self.textfc2.weight.data.uniform_(-initrange, initrange)
+        #self.textfc2.bias.data.zero_()
+
+    def init_hidden(self,batch_size,device):
+        hidden = (
+        torch.zeros(4,batch_size,256).requires_grad_().to(device),
+        torch.zeros(4,batch_size,256).requires_grad_().to(device),
+        ) # num_layers, Batch, hidden size
+        return hidden
+
 
     def set_swish(self, memory_efficient=True):
         """Sets swish function as memory efficient (for training) or standard (for export)"""
@@ -188,30 +233,44 @@ class EfficientNet3D(nn.Module):
 
         return x
 
-    def forward(self, inputs):
+    def forward(self, inputs, text, offset, audio):
         """ Calls extract_features to extract features, applies final linear layer, and returns logits. """
         bs = inputs.size(0)
-        # Convolution layers
-        x = self.extract_features(inputs)
+        video = []
+        for i in range(0, inputs.size(2), 64):
+            # Convolution layers
+            x = self.extract_features(inputs[:,:,i:i+64:1,:,:])
 
-        # Pooling and final linear layer
-        x = self._avg_pooling(x)
-        x = x.view(bs, -1)
-        x = self._dropout(x)
-        if self.mode=='single':
-            x = self._fc(x)
-            return x
-        elif self.mode=='multi':
-            outputs = []
-            for fc in self._fc:
-                outputs.append(fc(x))
-            return torch.stack(outputs)
+            # Pooling and final linear layer
+            x = self._avg_pooling(x)
+            x = x.view(bs, -1)
+            video.append(x)
+        video = torch.stack(video)
+        hidden = self.init_hidden(bs, inputs.device)
+        video, _ = self.lstm(video, hidden)
+        video = video.view(video.size(1),-1)
+
+        text = self.embedding(text,offset)
+        text = torch.tanh(text)
+        audio = self.extract_audio(audio)
+        audio = audio.view(audio.shape[0], -1)
+        features = torch.cat([video, text, audio], dim=1)
+        features = self._dropout(features)
+        # method 1
+        outputs = []
+        for fc in self.classifier1:
+            outputs.append(fc(features))
+        outputs = torch.stack(outputs)
+
+        genre = self.genrefc(features)
+        age = self.agefc(features)
+        return outputs, genre, age
 
     @classmethod
-    def from_name(cls, model_name, override_params=None, in_channels=3, mode='single', label_num=1):
+    def from_name(cls, model_name, override_params=None, in_channels=3, mode='multi', class_num = 4, label_num=4, vocab_size = 0):
         cls._check_model_name_is_valid(model_name)
         blocks_args, global_params = get_model_params(model_name, override_params)
-        return cls(blocks_args, global_params, in_channels, mode, label_num)
+        return cls(blocks_args, global_params, in_channels, mode, class_num, label_num, vocab_size)
 
     @classmethod
     def get_image_size(cls, model_name):
@@ -226,11 +285,33 @@ class EfficientNet3D(nn.Module):
         if model_name not in valid_models:
             raise ValueError('model_name should be one of: ' + ', '.join(valid_models))
 
+
+def c2_msra_fill(module: nn.Module) -> None:
+    nn.init.kaiming_normal_(module.weight, mode="fan_out", nonlinearity='relu')
+    if module.bias is not None:
+        nn.init.constant_(module.bias, 0)
+
+def init_weights(model, fc_init_std=0.01, zero_init_final_bn=True):
+    for m in model.modules():
+        if isinstance(m, nn.Conv3d):
+            c2_msra_fill(m)
+        elif isinstance(m, nn.BatchNorm3d):
+            batchnorm_weight=1.0
+            if m.weight is not None:
+                m.weight.data.fill_(batchnorm_weight)
+            if m.bias is not None:
+                m.bias.data.zero_()
+        if isinstance(m, nn.Linear):
+            m.weight.data.normal_(mean=0.0, std = fc_init_std)
+            if m.bias is not None:
+                m.bias.data.zero_()
+
 if __name__=='__main__':
 
     model = EfficientNet3D.from_name('efficientnet-b0', override_params={'num_classes':2}, in_channels=3, mode='multi', label_num=4)
     model = model.cuda()
     inputs = torch.randn((8,3,256,112,112)).cuda()
+
     for _ in range(100):
         out = model(inputs)
         print(out.shape)

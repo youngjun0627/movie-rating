@@ -1,0 +1,31 @@
+65799
+1.7.1
+Loading dataset
+{0: {1: 302, 0: 168, 2: 163, 3: 59}, 1: {2: 255, 1: 212, 0: 75, 3: 150}, 2: {1: 265, 2: 223, 0: 75, 3: 129}, 3: {2: 271, 1: 202, 3: 112, 0: 107}}
+{0: {1: 155, 0: 80, 3: 29, 2: 82}, 1: {0: 34, 2: 117, 1: 109, 3: 86}, 2: {0: 35, 3: 84, 1: 128, 2: 99}, 3: {0: 50, 1: 100, 2: 133, 3: 63}}
+train_dataset : batch_size -> 8, step_size -> 87, frames -> 1024
+validation_dataset : batch_size -> 8, step_size -> 44, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+[tensor([1.0298, 0.5728, 1.0613, 2.9322]), tensor([2.3067, 0.8160, 0.6784, 1.1533]), tensor([2.3067, 0.6528, 0.7758, 1.3411]), tensor([1.6168, 0.8564, 0.6384, 1.5446])]
+train gogosing
+----------------------------------------------
+lr : 0.001
+Epoch:[1] step : [80/87]
+data_time: 0.176, batch_time: 8.460
+Loss : 3.53020
+Label sex_nudity -> precision_score : 0.27324 recall_score : 0.25487 f1_score : 0.15133
+Label violence_gore -> precision_score : 0.27143 recall_score : 0.26733 f1_score : 0.22274
+Label profinancy -> precision_score : 0.21049 recall_score : 0.19741 f1_score : 0.13860
+Label frightening_intense_scene -> precision_score : 0.24456 recall_score : 0.24089 f1_score : 0.22255
+Age -> F1_score : 0.18366
+----------------------------------------------
+lr : 0.001
+Epoch:[2] step : [80/87]
+data_time: 0.180, batch_time: 9.551
+Loss : 3.43507
+Label sex_nudity -> precision_score : 0.32551 recall_score : 0.29975 f1_score : 0.18287
+Label violence_gore -> precision_score : 0.26112 recall_score : 0.26259 f1_score : 0.17603
+Label profinancy -> precision_score : 0.26883 recall_score : 0.25066 f1_score : 0.17578
+Label frightening_intense_scene -> precision_score : 0.25605 recall_score : 0.27251 f1_score : 0.21638
+Age -> F1_score : 0.19939

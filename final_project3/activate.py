@@ -117,8 +117,8 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
 
                     score = f1_score(np.array(target), np.array(pred), average='macro')
-                    precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=1)
-                    recall = recall_score(np.array(target), np.array(pred), average='macro', zero_division=1)
+                    precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=0)
+                    recall = recall_score(np.array(target), np.array(pred), average='macro', zero_division=0)
                     print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} f1_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
                     #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                     print(print_string)
@@ -220,8 +220,8 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             for idx, (pred, target) in enumerate(zip(preds, targets)):
                 score = f1_score(np.array(target), np.array(pred), average='macro')
                 result+=score
-                precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=1)
-                recall = recall_score(np.array(target), np.array(pred), average='macro', zero_division=1)
+                precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=0)
+                recall = recall_score(np.array(target), np.array(pred), average='macro', zero_division=0)
                 print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} f1_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
 
                 #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)

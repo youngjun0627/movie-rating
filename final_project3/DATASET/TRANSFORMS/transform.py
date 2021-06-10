@@ -49,7 +49,7 @@ def create_train_transform(flip,
             ],p=0.75)]
             
     if resize:
-        translist+=[albumentations.Resize(size+30, size+30, interpolation=2)]
+        translist+=[albumentations.Resize(size+16, size+16, interpolation=2)]
         translist+=[albumentations.RandomCrop(size,size,always_apply=True)]
 
     #translist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
@@ -64,7 +64,8 @@ def create_train_transform(flip,
 def create_val_transform(resize,size=112):
     vallist = []
     if resize:
-        vallist+=[albumentations.Resize(size,size, interpolation=2)]
+        vallist+=[albumentations.Resize(size+16,size+16, interpolation=2)]
+        vallist+=[albumentations.CenterCrop(size,size,always_apply=True)]
 
     #vallist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
     #vallist+=[albumentations.Normalize(mean=(0.45, 0.45, 0.45), std = (0.225, 0.225, 0.225))]

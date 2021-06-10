@@ -65,7 +65,7 @@ class SlowFast(nn.Module):
         self.fast_bn1 = nn.BatchNorm3d(8)
         self.fast_relu = nn.ReLU(inplace=True)
         self.fast_maxpool = nn.MaxPool3d(kernel_size=(1,3,3), stride=(1,2,2), padding=(0,1,1))
-        self.fast_res2 = self._make_layer_fast(block, 8, layers[0], head_conv=5)
+        self.fast_res2 = self._make_layer_fast(block, 8, layers[0], head_conv=3)
         self.fast_res3 = self._make_layer_fast(block, 16,layers[1], stride=2, head_conv=3)
         self.fast_res4 = self._make_layer_fast(block, 32, layers[2], stride=2, head_conv=3)
         self.fast_res5 = self._make_layer_fast(block, 64, layers[3], stride=2, head_conv=3)
@@ -81,8 +81,8 @@ class SlowFast(nn.Module):
         self.slow_bn1 = nn.BatchNorm3d(64)
         self.slow_relu = nn.ReLU(inplace=True)
         self.slow_maxpool = nn.MaxPool3d(kernel_size=(1,3,3), stride=(1,2,2), padding=(0,1,1))
-        self.slow_res2 = self._make_layer_slow(block, 64, layers[0], head_conv=3)
-        self.slow_res3 = self._make_layer_slow(block, 128, layers[1], stride=2,head_conv=3)
+        self.slow_res2 = self._make_layer_slow(block, 64, layers[0], head_conv=1)
+        self.slow_res3 = self._make_layer_slow(block, 128, layers[1], stride=2,head_conv=1)
         self.slow_res4 = self._make_layer_slow(block, 256, layers[2],stride=2,head_conv=3)
         self.slow_res5 = self._make_layer_slow(block,512,layers[3], stride=2, head_conv=3)
         
@@ -146,7 +146,7 @@ class SlowFast(nn.Module):
         video,_ = self.lstm(video, hidden)
         video = video.view(video.size(1),-1)
         text = self.embedding(text,offset)
-        text = F.relu(text)
+        text = torch.tanh(text)
         audio = self.extract_audio(audio)
         audio = audio.view(audio.shape[0], -1)
         features = torch.cat([video, text, audio], dim=1)
@@ -289,6 +289,11 @@ class SlowFast(nn.Module):
 
         self.slow_inplanes = planes * block.expansion + planes*block.expansion//8*2
         return nn.Sequential(*layers)
+
+
+def resnet34(**kwargs):
+    model = SlowFast(Bottleneck,[3,4,6,3],**kwargs)
+    return model
 
 def resnet50(**kwargs):
     model = SlowFast(Bottleneck,[3,4,6,3],**kwargs)

@@ -59,6 +59,9 @@ class VideoDataset(Dataset):
                 else: 
                     labels = []     
                     for _idx, label in enumerate(data[2:7]):
+                        if _idx==3:
+                            continue
+
                         label = self.convert_label(label)
                         labels.append(label)
                         
@@ -91,10 +94,10 @@ class VideoDataset(Dataset):
                 dic[_label]+=1
             self.class_weight = dic
         else:
-            label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'drug_smoking', 4: 'frighten'}
+            #label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'drug_smoking', 4: 'frighten'}
             #dic = {0:{}, 1: {}, 2:{}, 3:{}, 4:{}}
-            #label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'frighten'}
-            dic = {0:{}, 1: {}, 2:{}, 3:{}, 4:{}}
+            label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'frighten'}
+            dic = {0:{}, 1: {}, 2:{}, 3:{}}
             for _labels in self.labels:
                 for i, _label in enumerate(_labels):
                     if _label not in dic[i]:
@@ -236,14 +239,25 @@ class VideoDataset(Dataset):
 
         elif self.label_num==5 or self.label_num==4:
             weights = []
-            for i in range(self.label_num):
-                weights.append([0 for _ in range(self.sub_classnum+1)])
-                weight = self.class_weight[i]
-                for k,v in weight.items():
-                    weights[i][k]=v
-                weights[i] = torch.tensor(weights[i])
-                weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])[1]
-            return torch.stack(weights)
+            if self.sub_classnum == 1:
+                for i in range(self.label_num):
+                    weights.append([0 for _ in range(self.sub_classnum+1)])
+                    weight = self.class_weight[i]
+                    for k,v in weight.items():
+                        weights[i][k]=v
+                    weights[i] = torch.tensor(weights[i])
+                    weights[i] = weights[i][0]/weights[i][1]
+                return torch.stack(weights)
+            else:
+                for i in range(self.label_num):
+                    weights.append([0 for _ in range(self.sub_classnum)])
+                    weight = self.class_weight[i]
+                    for k,v in weight.items():
+                        weights[i][k]=v
+                    weights[i] = torch.tensor(weights[i])
+                    weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])
+                return torch.stack(weights)
+
     
     def get_age_weight2(self):
         dic={}
@@ -272,7 +286,7 @@ if __name__=='__main__':
     
     transform = create_train_transform(True,True,True,True,size=112)
     path = '/home/uchanlee/uchanlee/uchan/final_project/UTILS'
-    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=1, use_plot=False, mode='validation')
+    a = VideoDataset(path, transform = None, size=224,label_num=4, sub_classnum=1, use_plot=False, mode='validation')
     
     plots = a.plots
     counter = Counter()
@@ -301,7 +315,7 @@ if __name__=='__main__':
     '''
         
     #print(a.get_class_weight())
-    print(a.get_class_weight2())
+    print(a.get_class_weight2().requires_grad)
     #print(a.get_age_weight2())
     #print(a.get_age_weight())
     #for i in range(len(a.filenames)):

@@ -122,7 +122,6 @@ class VideoDataset(Dataset):
             mfccs = self.pad2d(mfccs, 4400)
             mfccs = np.array(mfccs).astype('float')
             mfccs = np.expand_dims(mfccs, axis=0)
-            print(mfccs.shape)
             return video, plot, np.array(label), self.sub_labels[index][0], np.array(self.sub_labels[index][1]), mfccs
         else:
             #return video, np.array(label), np.array([self.sub_labels[index][0]]), np.array(self.sub_labels[index][1])

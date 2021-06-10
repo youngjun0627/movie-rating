@@ -222,7 +222,7 @@ def main():
                 else:
                     save_model(model,optimizer,scheduler,epoch, params['model'])
                 model = model.to(device)
-            print('Total F1_score : {metrics:.5f}'.format(metrics = metric))
+            print('Total AUROC : {metrics:.5f}'.format(metrics = metric))
             print('======================================================')
 
             scheduler.step(metric)

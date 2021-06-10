@@ -229,7 +229,7 @@ class VideoDataset(Dataset):
 
     def get_class_weight2(self):
         if self.label_num==1:
-            weights = [0 for _ in range(self.sub_classnum)]
+            weights = [0 for _ in range(self.sub_classnum+1)]
             for k,v in self.class_weight.items():
                 weights[k]=v
             weights = torch.tensor(weights)
@@ -239,12 +239,12 @@ class VideoDataset(Dataset):
         elif self.label_num==5 or self.label_num==4:
             weights = []
             for i in range(self.label_num):
-                weights.append([0 for _ in range(self.sub_classnum+1)])
+                weights.append([0 for _ in range(self.sub_classnum)])
                 weight = self.class_weight[i]
                 for k,v in weight.items():
                     weights[i][k]=v
                 weights[i] = torch.tensor(weights[i])
-                weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])[1]
+                weights[i] = torch.tensor([sum(weights[i])/(self.sub_classnum*x) for x in weights[i]])
             return torch.stack(weights)
     
     def get_age_weight2(self):
@@ -274,7 +274,7 @@ if __name__=='__main__':
     
     transform = create_train_transform(True,True,True,True,size=112)
     path = '/home/uchanlee/uchanlee/uchan/final_project/UTILS'
-    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=1, use_plot=False, mode='validation')
+    a = VideoDataset(path, transform = None, size=224,label_num=4, sub_classnum=4, use_plot=False, mode='validation')
     
     plots = a.plots
     counter = Counter()

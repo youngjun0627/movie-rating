@@ -34,7 +34,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
     end = time.time()
     model.train()
     running_loss = 0
-    label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'alcohol_drugs_smoking', 4:'frightening_intense_scene'}
+    label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'frightening_intense_scene'}
     preds=None
     targets = None
     if mode=='single':
@@ -115,10 +115,13 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                 print_string = 'Loss : {loss:.5f}'.format(loss=running_loss/display)
                 print(print_string)
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
-
                     score = roc_auc_score(np.array(target), np.array(pred))
+                    pred = (pred>0.5).astype(int)
+
+                    precision = precision_score(np.array(target), np.array(pred), average='binary', zero_division=0)
+                    recall = recall_score(np.array(target), np.array(pred), average='binary', zero_division=0)
+                    print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} auroc_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
                     #precision = precision_score(np.array(target), np.array(pred), average='macro')
-                    print_string = 'Label {label_name} -> auroc_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
                     #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                     print(print_string)
                 
@@ -142,7 +145,7 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
     losses = AverageMeter()
     model.eval()
     end = time.time()
-    label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'alcohol_drugs_smoking', 4:'frightening_intense_scene'}
+    label_dic = {0:'sex_nudity', 1:'violence_gore', 2:'profinancy', 3:'frightening_intense_scene'}
     preds=None
     targets = None
     if mode=='single':
@@ -218,10 +221,13 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             result = 0 
             for idx, (pred, target) in enumerate(zip(preds, targets)):
                 score = roc_auc_score(np.array(target), np.array(pred))
+                pred = (pred>0.5).astype(int)
+                precision = precision_score(np.array(target), np.array(pred), average='binary', zero_division=0)
+                recall = recall_score(np.array(target), np.array(pred), average='binary', zero_division=0)
+                print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} auroc_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
                 result += score
                 #precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=1)
                 #result2 += precision
-                print_string = 'Label {label_name} -> auroc_score : {metric:.5f}'.format(label_name=label_dic[idx], metric=score)
 
                 #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                 print(print_string)

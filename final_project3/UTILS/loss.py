@@ -61,7 +61,7 @@ class Custom_MultiCrossEntropyLoss(LabelSmoothCrossEntropyLoss):
             self.celoss = []
             for i in range(label_num):
                 self.celoss.append(LabelSmoothCrossEntropyLoss(weight = weight[i], reduction='mean'))
-
+                print(weight[i])
     def forward(self, output, label):
         #celoss = LabelSmoothCrossEntropyLoss(weight = self.weight, reduction = 'mean')
         loss=0

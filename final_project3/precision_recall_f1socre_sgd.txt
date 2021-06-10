@@ -1,0 +1,470 @@
+104974
+1.7.1
+Loading dataset
+{0: {1: 302, 0: 168, 2: 163, 3: 59}, 1: {2: 255, 1: 212, 0: 75, 3: 150}, 2: {1: 265, 2: 223, 0: 75, 3: 129}, 3: {2: 271, 1: 202, 3: 112, 0: 107}}
+{0: {1: 155, 0: 80, 3: 29, 2: 82}, 1: {0: 34, 2: 117, 1: 109, 3: 86}, 2: {0: 35, 3: 84, 1: 128, 2: 99}, 3: {0: 50, 1: 100, 2: 133, 3: 63}}
+train_dataset : batch_size -> 4, step_size -> 173, frames -> 1024
+validation_dataset : batch_size -> 4, step_size -> 87, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+train gogosing
+----------------------------------------------
+lr : 0.001
+Epoch:[1] step : [170/173]
+data_time: 0.094, batch_time: 3.820
+Loss : 3.03783
+Label sex_nudity -> precision_score : 0.20364 recall_score : 0.24086 f1_score : 0.20229
+Label violence_gore -> precision_score : 0.25080 recall_score : 0.24591 f1_score : 0.23365
+Label profinancy -> precision_score : 0.20547 recall_score : 0.23175 f1_score : 0.20325
+Label frightening_intense_scene -> precision_score : 0.22124 recall_score : 0.23595 f1_score : 0.20819
+Age -> F1_score : 0.21569
+----------------------------------------------
+lr : 0.001
+Epoch:[2] step : [170/173]
+data_time: 0.092, batch_time: 3.821
+Loss : 2.98402
+Label sex_nudity -> precision_score : 0.21837 recall_score : 0.24456 f1_score : 0.20904
+Label violence_gore -> precision_score : 0.32137 recall_score : 0.26275 f1_score : 0.23777
+Label profinancy -> precision_score : 0.28355 recall_score : 0.27990 f1_score : 0.24158
+Label frightening_intense_scene -> precision_score : 0.26016 recall_score : 0.25637 f1_score : 0.21075
+Age -> F1_score : 0.21274
+----------------------------------------------
+lr : 0.001
+Epoch:[3] step : [170/173]
+data_time: 0.369, batch_time: 4.502
+Loss : 2.96890
+Label sex_nudity -> precision_score : 0.23212 recall_score : 0.25038 f1_score : 0.20681
+Label violence_gore -> precision_score : 0.22369 recall_score : 0.26232 f1_score : 0.22677
+Label profinancy -> precision_score : 0.30264 recall_score : 0.25983 f1_score : 0.23020
+Label frightening_intense_scene -> precision_score : 0.26394 recall_score : 0.26915 f1_score : 0.22333
+Age -> F1_score : 0.21106
+----------------------------------------------
+lr : 0.001
+Epoch:[4] step : [170/173]
+data_time: 0.522, batch_time: 4.634
+Loss : 2.93035
+Label sex_nudity -> precision_score : 0.25656 recall_score : 0.25880 f1_score : 0.20653
+Label violence_gore -> precision_score : 0.25760 recall_score : 0.28029 f1_score : 0.24404
+Label profinancy -> precision_score : 0.24996 recall_score : 0.26672 f1_score : 0.23278
+Label frightening_intense_scene -> precision_score : 0.25680 recall_score : 0.26130 f1_score : 0.21755
+Age -> F1_score : 0.22144
+----------------------------------------------
+lr : 0.001
+Epoch:[5] step : [170/173]
+data_time: 0.088, batch_time: 3.847
+Loss : 2.94280
+Label sex_nudity -> precision_score : 0.24034 recall_score : 0.25092 f1_score : 0.21150
+Label violence_gore -> precision_score : 0.23370 recall_score : 0.26272 f1_score : 0.22862
+Label profinancy -> precision_score : 0.16500 recall_score : 0.23095 f1_score : 0.18951
+Label frightening_intense_scene -> precision_score : 0.27657 recall_score : 0.25481 f1_score : 0.21762
+Age -> F1_score : 0.23028
+======================================================
+validation gogosing
+Loss : 2.85347
+Label sex_nudity -> precision_score : 0.11199 recall_score : 0.25000 f1_score : 0.15469
+Label violence_gore -> precision_score : 0.23107 recall_score : 0.34076 f1_score : 0.27021
+Label profinancy -> precision_score : 0.09275 recall_score : 0.25000 f1_score : 0.13531
+Label frightening_intense_scene -> precision_score : 0.15899 recall_score : 0.25062 f1_score : 0.14376
+Age -> F1_score : 0.13267
+Total F1_score : 0.17599
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[6] step : [170/173]
+data_time: 0.096, batch_time: 3.826
+Loss : 2.88999
+Label sex_nudity -> precision_score : 0.19899 recall_score : 0.24218 f1_score : 0.18161
+Label violence_gore -> precision_score : 0.23673 recall_score : 0.27252 f1_score : 0.23473
+Label profinancy -> precision_score : 0.20161 recall_score : 0.25025 f1_score : 0.21370
+Label frightening_intense_scene -> precision_score : 0.29776 recall_score : 0.26789 f1_score : 0.22620
+Age -> F1_score : 0.26221
+----------------------------------------------
+lr : 0.001
+Epoch:[7] step : [170/173]
+data_time: 0.141, batch_time: 3.970
+Loss : 2.87286
+Label sex_nudity -> precision_score : 0.23941 recall_score : 0.25492 f1_score : 0.20896
+Label violence_gore -> precision_score : 0.29566 recall_score : 0.31225 f1_score : 0.27625
+Label profinancy -> precision_score : 0.22548 recall_score : 0.26694 f1_score : 0.22725
+Label frightening_intense_scene -> precision_score : 0.31085 recall_score : 0.27128 f1_score : 0.22769
+Age -> F1_score : 0.29516
+----------------------------------------------
+lr : 0.001
+Epoch:[8] step : [170/173]
+data_time: 0.425, batch_time: 4.570
+Loss : 2.85904
+Label sex_nudity -> precision_score : 0.25486 recall_score : 0.25700 f1_score : 0.20257
+Label violence_gore -> precision_score : 0.28812 recall_score : 0.29232 f1_score : 0.25975
+Label profinancy -> precision_score : 0.23662 recall_score : 0.25207 f1_score : 0.21241
+Label frightening_intense_scene -> precision_score : 0.26116 recall_score : 0.27831 f1_score : 0.24068
+Age -> F1_score : 0.26778
+----------------------------------------------
+lr : 0.001
+Epoch:[9] step : [170/173]
+data_time: 0.097, batch_time: 3.854
+Loss : 2.84611
+Label sex_nudity -> precision_score : 0.29245 recall_score : 0.27137 f1_score : 0.21886
+Label violence_gore -> precision_score : 0.30780 recall_score : 0.32204 f1_score : 0.28690
+Label profinancy -> precision_score : 0.28103 recall_score : 0.27365 f1_score : 0.24189
+Label frightening_intense_scene -> precision_score : 0.31981 recall_score : 0.28683 f1_score : 0.24702
+Age -> F1_score : 0.27525
+----------------------------------------------
+lr : 0.001
+Epoch:[10] step : [170/173]
+data_time: 0.094, batch_time: 3.842
+Loss : 2.82851
+Label sex_nudity -> precision_score : 0.25596 recall_score : 0.26061 f1_score : 0.21415
+Label violence_gore -> precision_score : 0.33065 recall_score : 0.31940 f1_score : 0.28754
+Label profinancy -> precision_score : 0.22646 recall_score : 0.26648 f1_score : 0.22674
+Label frightening_intense_scene -> precision_score : 0.24123 recall_score : 0.27835 f1_score : 0.23647
+Age -> F1_score : 0.30129
+======================================================
+validation gogosing
+Loss : 2.84759
+Label sex_nudity -> precision_score : 0.11199 recall_score : 0.25000 f1_score : 0.15469
+Label violence_gore -> precision_score : 0.21986 recall_score : 0.33639 f1_score : 0.26591
+Label profinancy -> precision_score : 0.16233 recall_score : 0.24444 f1_score : 0.18329
+Label frightening_intense_scene -> precision_score : 0.32047 recall_score : 0.29408 f1_score : 0.25247
+Age -> F1_score : 0.14889
+Total F1_score : 0.21409
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[11] step : [170/173]
+data_time: 0.429, batch_time: 4.599
+Loss : 2.80637
+Label sex_nudity -> precision_score : 0.27961 recall_score : 0.27048 f1_score : 0.22496
+Label violence_gore -> precision_score : 0.30664 recall_score : 0.32895 f1_score : 0.29358
+Label profinancy -> precision_score : 0.32894 recall_score : 0.27285 f1_score : 0.24767
+Label frightening_intense_scene -> precision_score : 0.37961 recall_score : 0.30485 f1_score : 0.28669
+Age -> F1_score : 0.32546
+----------------------------------------------
+lr : 0.001
+Epoch:[12] step : [170/173]
+data_time: 0.094, batch_time: 3.828
+Loss : 2.79277
+Label sex_nudity -> precision_score : 0.27899 recall_score : 0.27320 f1_score : 0.23055
+Label violence_gore -> precision_score : 0.50051 recall_score : 0.35030 f1_score : 0.31975
+Label profinancy -> precision_score : 0.40488 recall_score : 0.26258 f1_score : 0.22812
+Label frightening_intense_scene -> precision_score : 0.33388 recall_score : 0.28068 f1_score : 0.25056
+Age -> F1_score : 0.34081
+----------------------------------------------
+lr : 0.001
+Epoch:[13] step : [170/173]
+data_time: 0.092, batch_time: 3.838
+Loss : 2.74608
+Label sex_nudity -> precision_score : 0.26151 recall_score : 0.26302 f1_score : 0.21538
+Label violence_gore -> precision_score : 0.32591 recall_score : 0.33989 f1_score : 0.29357
+Label profinancy -> precision_score : 0.25152 recall_score : 0.26977 f1_score : 0.22556
+Label frightening_intense_scene -> precision_score : 0.37881 recall_score : 0.31227 f1_score : 0.28688
+Age -> F1_score : 0.37600
+----------------------------------------------
+lr : 0.001
+Epoch:[14] step : [170/173]
+data_time: 0.153, batch_time: 4.071
+Loss : 2.72214
+Label sex_nudity -> precision_score : 0.26189 recall_score : 0.26963 f1_score : 0.21236
+Label violence_gore -> precision_score : 0.37401 recall_score : 0.35202 f1_score : 0.32210
+Label profinancy -> precision_score : 0.32980 recall_score : 0.26499 f1_score : 0.23283
+Label frightening_intense_scene -> precision_score : 0.30977 recall_score : 0.30561 f1_score : 0.27849
+Age -> F1_score : 0.40373
+----------------------------------------------
+lr : 0.001
+Epoch:[15] step : [170/173]
+data_time: 0.101, batch_time: 3.841
+Loss : 2.68866
+Label sex_nudity -> precision_score : 0.29840 recall_score : 0.27559 f1_score : 0.23020
+Label violence_gore -> precision_score : 0.30289 recall_score : 0.31636 f1_score : 0.27813
+Label profinancy -> precision_score : 0.39989 recall_score : 0.28814 f1_score : 0.25983
+Label frightening_intense_scene -> precision_score : 0.37104 recall_score : 0.30937 f1_score : 0.28344
+Age -> F1_score : 0.44246
+======================================================
+validation gogosing
+Loss : 2.81389
+Label sex_nudity -> precision_score : 0.11199 recall_score : 0.25000 f1_score : 0.15469
+Label violence_gore -> precision_score : 0.22010 recall_score : 0.33655 f1_score : 0.26613
+Label profinancy -> precision_score : 0.21802 recall_score : 0.25253 f1_score : 0.14054
+Label frightening_intense_scene -> precision_score : 0.37563 recall_score : 0.31733 f1_score : 0.26742
+Age -> F1_score : 0.18046
+Total F1_score : 0.20720
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[16] step : [170/173]
+data_time: 0.110, batch_time: 3.861
+Loss : 2.64476
+Label sex_nudity -> precision_score : 0.30739 recall_score : 0.27274 f1_score : 0.22087
+Label violence_gore -> precision_score : 0.41469 recall_score : 0.34945 f1_score : 0.32700
+Label profinancy -> precision_score : 0.27804 recall_score : 0.26937 f1_score : 0.22536
+Label frightening_intense_scene -> precision_score : 0.39892 recall_score : 0.31912 f1_score : 0.29911
+Age -> F1_score : 0.49937
+----------------------------------------------
+lr : 0.001
+Epoch:[17] step : [170/173]
+data_time: 3.531, batch_time: 7.290
+Loss : 2.58857
+Label sex_nudity -> precision_score : 0.24359 recall_score : 0.25686 f1_score : 0.20008
+Label violence_gore -> precision_score : 0.30081 recall_score : 0.33801 f1_score : 0.29482
+Label profinancy -> precision_score : 0.40625 recall_score : 0.29575 f1_score : 0.26856
+Label frightening_intense_scene -> precision_score : 0.41286 recall_score : 0.31778 f1_score : 0.29745
+Age -> F1_score : 0.54873
+----------------------------------------------
+lr : 0.001
+Epoch:[18] step : [170/173]
+data_time: 2.857, batch_time: 6.599
+Loss : 2.53760
+Label sex_nudity -> precision_score : 0.27375 recall_score : 0.27620 f1_score : 0.23327
+Label violence_gore -> precision_score : 0.43737 recall_score : 0.36336 f1_score : 0.33306
+Label profinancy -> precision_score : 0.25481 recall_score : 0.28111 f1_score : 0.23758
+Label frightening_intense_scene -> precision_score : 0.41143 recall_score : 0.34229 f1_score : 0.32770
+Age -> F1_score : 0.57319
+----------------------------------------------
+lr : 0.001
+Epoch:[19] step : [170/173]
+data_time: 0.220, batch_time: 4.083
+Loss : 2.51227
+Label sex_nudity -> precision_score : 0.36675 recall_score : 0.29235 f1_score : 0.24345
+Label violence_gore -> precision_score : 0.47192 recall_score : 0.35850 f1_score : 0.33482
+Label profinancy -> precision_score : 0.37533 recall_score : 0.30654 f1_score : 0.28012
+Label frightening_intense_scene -> precision_score : 0.44927 recall_score : 0.33683 f1_score : 0.32485
+Age -> F1_score : 0.61887
+----------------------------------------------
+lr : 0.001
+Epoch:[20] step : [170/173]
+data_time: 0.107, batch_time: 3.854
+Loss : 2.45771
+Label sex_nudity -> precision_score : 0.38693 recall_score : 0.29408 f1_score : 0.25300
+Label violence_gore -> precision_score : 0.44327 recall_score : 0.36862 f1_score : 0.33817
+Label profinancy -> precision_score : 0.36352 recall_score : 0.30365 f1_score : 0.27461
+Label frightening_intense_scene -> precision_score : 0.44291 recall_score : 0.32815 f1_score : 0.30802
+Age -> F1_score : 0.66331
+======================================================
+validation gogosing
+Loss : 2.83026
+Label sex_nudity -> precision_score : 0.27964 recall_score : 0.25610 f1_score : 0.16739
+Label violence_gore -> precision_score : 0.21255 recall_score : 0.32759 f1_score : 0.25513
+Label profinancy -> precision_score : 0.21893 recall_score : 0.25562 f1_score : 0.15055
+Label frightening_intense_scene -> precision_score : 0.29462 recall_score : 0.37549 f1_score : 0.31450
+Age -> F1_score : 0.22305
+Total F1_score : 0.22189
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[21] step : [170/173]
+data_time: 0.281, batch_time: 4.091
+Loss : 2.41924
+Label sex_nudity -> precision_score : 0.39181 recall_score : 0.30988 f1_score : 0.27577
+Label violence_gore -> precision_score : 0.36730 recall_score : 0.36295 f1_score : 0.32709
+Label profinancy -> precision_score : 0.40630 recall_score : 0.29360 f1_score : 0.26301
+Label frightening_intense_scene -> precision_score : 0.52707 recall_score : 0.37566 f1_score : 0.36767
+Age -> F1_score : 0.70722
+----------------------------------------------
+lr : 0.001
+Epoch:[22] step : [170/173]
+data_time: 0.088, batch_time: 3.831
+Loss : 2.37829
+Label sex_nudity -> precision_score : 0.32418 recall_score : 0.29530 f1_score : 0.25975
+Label violence_gore -> precision_score : 0.39183 recall_score : 0.37249 f1_score : 0.33821
+Label profinancy -> precision_score : 0.38723 recall_score : 0.29410 f1_score : 0.26024
+Label frightening_intense_scene -> precision_score : 0.52234 recall_score : 0.36063 f1_score : 0.34941
+Age -> F1_score : 0.73566
+----------------------------------------------
+lr : 0.001
+Epoch:[23] step : [170/173]
+data_time: 0.105, batch_time: 3.853
+Loss : 2.34394
+Label sex_nudity -> precision_score : 0.32153 recall_score : 0.28867 f1_score : 0.24704
+Label violence_gore -> precision_score : 0.48470 recall_score : 0.37351 f1_score : 0.34906
+Label profinancy -> precision_score : 0.40182 recall_score : 0.30714 f1_score : 0.27435
+Label frightening_intense_scene -> precision_score : 0.48719 recall_score : 0.37005 f1_score : 0.35613
+Age -> F1_score : 0.80372
+----------------------------------------------
+lr : 0.001
+Epoch:[24] step : [170/173]
+data_time: 16.432, batch_time: 20.339
+Loss : 2.29597
+Label sex_nudity -> precision_score : 0.39593 recall_score : 0.32490 f1_score : 0.29762
+Label violence_gore -> precision_score : 0.41028 recall_score : 0.37396 f1_score : 0.34400
+Label profinancy -> precision_score : 0.48832 recall_score : 0.35018 f1_score : 0.34073
+Label frightening_intense_scene -> precision_score : 0.45200 recall_score : 0.34556 f1_score : 0.32851
+Age -> F1_score : 0.84247
+----------------------------------------------
+lr : 0.001
+Epoch:[25] step : [170/173]
+data_time: 0.095, batch_time: 3.835
+Loss : 2.25777
+Label sex_nudity -> precision_score : 0.34370 recall_score : 0.29683 f1_score : 0.26177
+Label violence_gore -> precision_score : 0.59636 recall_score : 0.42399 f1_score : 0.41539
+Label profinancy -> precision_score : 0.51110 recall_score : 0.32175 f1_score : 0.30277
+Label frightening_intense_scene -> precision_score : 0.45588 recall_score : 0.34989 f1_score : 0.32463
+Age -> F1_score : 0.87955
+======================================================
+validation gogosing
+Loss : 2.83666
+Label sex_nudity -> precision_score : 0.11199 recall_score : 0.25000 f1_score : 0.15469
+Label violence_gore -> precision_score : 0.42434 recall_score : 0.34609 f1_score : 0.28413
+Label profinancy -> precision_score : 0.17663 recall_score : 0.25253 f1_score : 0.14078
+Label frightening_intense_scene -> precision_score : 0.33647 recall_score : 0.28434 f1_score : 0.21993
+Age -> F1_score : 0.23817
+Total F1_score : 0.19988
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[26] step : [170/173]
+data_time: 0.095, batch_time: 3.854
+Loss : 2.21944
+Label sex_nudity -> precision_score : 0.42526 recall_score : 0.33263 f1_score : 0.30762
+Label violence_gore -> precision_score : 0.43191 recall_score : 0.41863 f1_score : 0.39548
+Label profinancy -> precision_score : 0.51002 recall_score : 0.31697 f1_score : 0.28628
+Label frightening_intense_scene -> precision_score : 0.49419 recall_score : 0.39405 f1_score : 0.39268
+Age -> F1_score : 0.88629
+----------------------------------------------
+lr : 0.001
+Epoch:[27] step : [170/173]
+data_time: 0.101, batch_time: 3.831
+Loss : 2.18808
+Label sex_nudity -> precision_score : 0.42651 recall_score : 0.33126 f1_score : 0.30659
+Label violence_gore -> precision_score : 0.53461 recall_score : 0.42001 f1_score : 0.40303
+Label profinancy -> precision_score : 0.56454 recall_score : 0.37515 f1_score : 0.37393
+Label frightening_intense_scene -> precision_score : 0.56301 recall_score : 0.42740 f1_score : 0.42702
+Age -> F1_score : 0.91252
+----------------------------------------------
+lr : 0.001
+Epoch:[28] step : [170/173]
+data_time: 0.134, batch_time: 3.925
+Loss : 2.16477
+Label sex_nudity -> precision_score : 0.41002 recall_score : 0.33032 f1_score : 0.30329
+Label violence_gore -> precision_score : 0.54530 recall_score : 0.44929 f1_score : 0.43828
+Label profinancy -> precision_score : 0.54180 recall_score : 0.37784 f1_score : 0.37527
+Label frightening_intense_scene -> precision_score : 0.51524 recall_score : 0.40066 f1_score : 0.39419
+Age -> F1_score : 0.94607
+----------------------------------------------
+lr : 0.001
+Epoch:[29] step : [170/173]
+data_time: 0.091, batch_time: 3.825
+Loss : 2.13350
+Label sex_nudity -> precision_score : 0.42954 recall_score : 0.34090 f1_score : 0.31732
+Label violence_gore -> precision_score : 0.46234 recall_score : 0.44720 f1_score : 0.42466
+Label profinancy -> precision_score : 0.50886 recall_score : 0.36393 f1_score : 0.35686
+Label frightening_intense_scene -> precision_score : 0.60661 recall_score : 0.41861 f1_score : 0.41762
+Age -> F1_score : 0.96163
+----------------------------------------------
+lr : 0.001
+Epoch:[30] step : [170/173]
+data_time: 0.193, batch_time: 4.448
+Loss : 2.09928
+Label sex_nudity -> precision_score : 0.43697 recall_score : 0.35319 f1_score : 0.33639
+Label violence_gore -> precision_score : 0.59465 recall_score : 0.48161 f1_score : 0.47086
+Label profinancy -> precision_score : 0.60264 recall_score : 0.39988 f1_score : 0.41462
+Label frightening_intense_scene -> precision_score : 0.55698 recall_score : 0.42143 f1_score : 0.42065
+Age -> F1_score : 0.96258
+======================================================
+validation gogosing
+Loss : 2.83105
+Label sex_nudity -> precision_score : 0.19631 recall_score : 0.25305 f1_score : 0.16150
+Label violence_gore -> precision_score : 0.40659 recall_score : 0.34884 f1_score : 0.28984
+Label profinancy -> precision_score : 0.16981 recall_score : 0.25850 f1_score : 0.20482
+Label frightening_intense_scene -> precision_score : 0.27180 recall_score : 0.30932 f1_score : 0.24876
+Age -> F1_score : 0.21598
+Total F1_score : 0.22623
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[31] step : [170/173]
+data_time: 0.082, batch_time: 3.822
+Loss : 2.08558
+Label sex_nudity -> precision_score : 0.43760 recall_score : 0.36068 f1_score : 0.34483
+Label violence_gore -> precision_score : 0.65439 recall_score : 0.48653 f1_score : 0.47807
+Label profinancy -> precision_score : 0.60526 recall_score : 0.45494 f1_score : 0.47330
+Label frightening_intense_scene -> precision_score : 0.58499 recall_score : 0.44304 f1_score : 0.44789
+Age -> F1_score : 0.97348
+----------------------------------------------
+lr : 0.001
+Epoch:[32] step : [170/173]
+data_time: 0.161, batch_time: 3.912
+Loss : 2.06407
+Label sex_nudity -> precision_score : 0.42477 recall_score : 0.34006 f1_score : 0.31841
+Label violence_gore -> precision_score : 0.57783 recall_score : 0.46638 f1_score : 0.46225
+Label profinancy -> precision_score : 0.68684 recall_score : 0.43697 f1_score : 0.45748
+Label frightening_intense_scene -> precision_score : 0.62206 recall_score : 0.48067 f1_score : 0.49900
+Age -> F1_score : 0.98264
+----------------------------------------------
+lr : 0.001
+Epoch:[33] step : [170/173]
+data_time: 0.115, batch_time: 3.915
+Loss : 2.05406
+Label sex_nudity -> precision_score : 0.43024 recall_score : 0.36034 f1_score : 0.34852
+Label violence_gore -> precision_score : 0.70273 recall_score : 0.46196 f1_score : 0.44784
+Label profinancy -> precision_score : 0.62601 recall_score : 0.44827 f1_score : 0.46798
+Label frightening_intense_scene -> precision_score : 0.62760 recall_score : 0.48147 f1_score : 0.50171
+Age -> F1_score : 0.98136
+----------------------------------------------
+lr : 0.001
+Epoch:[34] step : [170/173]
+data_time: 0.113, batch_time: 3.863
+Loss : 2.03373
+Label sex_nudity -> precision_score : 0.41807 recall_score : 0.36504 f1_score : 0.34977
+Label violence_gore -> precision_score : 0.63134 recall_score : 0.48622 f1_score : 0.47439
+Label profinancy -> precision_score : 0.58577 recall_score : 0.43638 f1_score : 0.45448
+Label frightening_intense_scene -> precision_score : 0.66151 recall_score : 0.50267 f1_score : 0.52476
+Age -> F1_score : 0.98106
+----------------------------------------------
+lr : 0.001
+Epoch:[35] step : [170/173]
+data_time: 0.085, batch_time: 3.916
+Loss : 2.02769
+Label sex_nudity -> precision_score : 0.40888 recall_score : 0.35617 f1_score : 0.34082
+Label violence_gore -> precision_score : 0.67187 recall_score : 0.52769 f1_score : 0.53028
+Label profinancy -> precision_score : 0.60149 recall_score : 0.44749 f1_score : 0.46790
+Label frightening_intense_scene -> precision_score : 0.67445 recall_score : 0.51830 f1_score : 0.54443
+Age -> F1_score : 0.99542
+======================================================
+validation gogosing
+Loss : 2.84316
+Label sex_nudity -> precision_score : 0.11232 recall_score : 0.25000 f1_score : 0.15500
+Label violence_gore -> precision_score : 0.23800 recall_score : 0.33737 f1_score : 0.26662
+Label profinancy -> precision_score : 0.15709 recall_score : 0.24686 f1_score : 0.17670
+Label frightening_intense_scene -> precision_score : 0.31270 recall_score : 0.32244 f1_score : 0.27812
+Age -> F1_score : 0.23012
+Total F1_score : 0.21911
+======================================================
+----------------------------------------------
+lr : 0.001
+Epoch:[36] step : [170/173]
+data_time: 9.395, batch_time: 13.138
+Loss : 2.00899
+Label sex_nudity -> precision_score : 0.68911 recall_score : 0.38636 f1_score : 0.38051
+Label violence_gore -> precision_score : 0.58080 recall_score : 0.50112 f1_score : 0.48780
+Label profinancy -> precision_score : 0.65786 recall_score : 0.49602 f1_score : 0.52769
+Label frightening_intense_scene -> precision_score : 0.62274 recall_score : 0.50105 f1_score : 0.51972
+Age -> F1_score : 0.98945
+----------------------------------------------
+lr : 0.001
+Epoch:[37] step : [170/173]
+data_time: 0.102, batch_time: 3.855
+Loss : 1.98649
+Label sex_nudity -> precision_score : 0.46193 recall_score : 0.40662 f1_score : 0.40040
+Label violence_gore -> precision_score : 0.68998 recall_score : 0.55034 f1_score : 0.53610
+Label profinancy -> precision_score : 0.60908 recall_score : 0.47720 f1_score : 0.50235
+Label frightening_intense_scene -> precision_score : 0.63956 recall_score : 0.52610 f1_score : 0.54917
+Age -> F1_score : 0.99157
+----------------------------------------------
+lr : 0.001
+Epoch:[38] step : [170/173]
+data_time: 0.087, batch_time: 3.832
+Loss : 1.98283
+Label sex_nudity -> precision_score : 0.69835 recall_score : 0.38384 f1_score : 0.37988
+Label violence_gore -> precision_score : 0.60141 recall_score : 0.50872 f1_score : 0.49575
+Label profinancy -> precision_score : 0.63535 recall_score : 0.50332 f1_score : 0.53501
+Label frightening_intense_scene -> precision_score : 0.69145 recall_score : 0.54699 f1_score : 0.57220
+Age -> F1_score : 0.99323
+----------------------------------------------
+lr : 0.001
+Epoch:[39] step : [170/173]
+data_time: 7.525, batch_time: 11.278
+Loss : 1.96566
+Label sex_nudity -> precision_score : 0.45109 recall_score : 0.41910 f1_score : 0.41395
+Label violence_gore -> precision_score : 0.66764 recall_score : 0.52737 f1_score : 0.51434
+Label profinancy -> precision_score : 0.62755 recall_score : 0.51927 f1_score : 0.54449
+Label frightening_intense_scene -> precision_score : 0.69149 recall_score : 0.55994 f1_score : 0.58409
+Age -> F1_score : 0.99538
