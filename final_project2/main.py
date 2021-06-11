@@ -186,7 +186,7 @@ def main():
     
         #criterion1 = Custom_MultiCrossEntropyLoss(weight = train_dataset.get_class_weight2().to(device), label_num=params['label_num'])
         criterion1 = Custom_MultiBinaryCrossEntropyLoss(weight = train_dataset.get_class_weight2().to(device), label_num=params['label_num'])
-        criterion2 = Custom_BCELoss()
+        criterion2 = Custom_BCELoss(weight = train_dataset.get_genre_weight2().to(device))
         criterion3 = Custom_CrossEntropyLoss(weight = train_dataset.get_age_weight2().to(device))
     #optimizer = optim.SGD(model.parameters(), lr = params['learning_rate'], momentum = params['momentum'], weight_decay = params['weight_decay'])
     #scheduler = optim.lr_scheduler.StepLR(optimizer,  step_size = params['step'], gamma=0.1)

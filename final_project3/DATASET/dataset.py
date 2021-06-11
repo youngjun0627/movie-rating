@@ -260,6 +260,17 @@ class VideoDataset(Dataset):
         weights = torch.tensor(weights)
         weights = torch.tensor([sum(weights)/(x*self.sub_classnum) for x in weights])
         return weights
+    
+    def get_genre_weight2(self):
+        weights=[[0,0] for i in range(9)]
+        for label in self.sub_labels:
+            label = label[1]
+            for idx, la in enumerate(label):
+                weights[idx][la]+=1
+        for i in range(9):
+            weights[i] = weights[i][0]/weights[i][1]
+        weights = torch.tensor(weights)
+        return weights
 
     def normalize(self, img):
         return img/255.
@@ -303,7 +314,7 @@ if __name__=='__main__':
     '''
         
     #print(a.get_class_weight())
-    print(a.get_class_weight2())
+    print(a.get_genre_weight2())
     #print(a.get_age_weight2())
     #print(a.get_age_weight())
     #for i in range(len(a.filenames)):

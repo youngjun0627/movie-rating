@@ -112,17 +112,16 @@ class Custom_MSELoss(nn.MSELoss):
         return loss
 
 class Custom_BCELoss(nn.BCELoss):
-    def __init__(self):
+    def __init__(self, weight):
         super(Custom_BCELoss,self).__init__()
-
-
+        
+        self.weight = weight
         #train_dataset.labels # size (video_size, 7)
 
 
     def forward(self, output, label):
-        output = torch.sigmoid(output)
         label = label.float()
-        bceloss = nn.BCELoss()
+        bceloss = nn.BCEWithLogitsLoss(pos_weight = self.weight)
         return bceloss(output, label) 
 
 class Custom_HingeLoss(nn.MultiMarginLoss):

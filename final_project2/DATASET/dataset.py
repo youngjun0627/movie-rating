@@ -269,8 +269,22 @@ class VideoDataset(Dataset):
         weights = [0 for _ in range(len(dic.keys()))]
         for k,v in dic.items():
             weights[k]=v
+        print('age',weights)
         weights = torch.tensor(weights)
         weights = torch.tensor([sum(weights)/(x*self.sub_classnum) for x in weights])
+        return weights
+
+    def get_genre_weight2(self):
+        weights=[[0,0] for i in range(9)]
+        for label in self.sub_labels:
+            label = label[1]
+            for idx, la in enumerate(label):
+                weights[idx][la]+=1
+        print('genre',weights)
+        for i in range(9):
+            weights[i] = weights[i][0]/weights[i][1]
+
+        weights = torch.tensor(weights)
         return weights
 
     def normalize(self, img):
@@ -295,6 +309,8 @@ if __name__=='__main__':
         counter.update(tokenizer(plot))
     vocab = Vocab(counter,min_freq=1)
     a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_age_weight2())
+    print(a.get_genre_weight2())
     '''
     r_mean = 0
     r_std = 0

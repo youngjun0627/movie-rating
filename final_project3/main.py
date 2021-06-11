@@ -196,20 +196,20 @@ def main():
     
         criterion1 = Custom_MultiCrossEntropyLoss(weight = train_dataset.get_class_weight2().to(device), label_num=params['label_num'])
         #criterion1 = Custom_MultiBinaryCrossEntropyLoss(weight = train_dataset.get_class_weight2().to(device), label_num=params['label_num'])
-        criterion2 = Custom_BCELoss()
+        criterion2 = Custom_BCELoss(weight = train_dataset.get_genre_weight2().to(device))
         criterion3 = Custom_CrossEntropyLoss(weight = train_dataset.get_age_weight2().to(device))
     #optimizer = optim.SGD(model.parameters(), lr = params['learning_rate'], momentum = params['momentum'], weight_decay = params['weight_decay'])
     #scheduler = optim.lr_scheduler.StepLR(optimizer,  step_size = params['step'], gamma=0.1)
 
-    optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
-    #optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
+    #optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
+    optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
 
     #optimizer = optim.SGDW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
     #optimizer = SGDP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], momentum=params['momentum'], nesterov=True)
     #optimizer = AdamP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], betas = (0.9, 0.999))
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 2, factor = 0.5, verbose=False)
+    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 2, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
-    #scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=10, eta_max=0.01, T_up=10, gamma=0.5)
+    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=10, eta_max=0.01, T_up=10, gamma=0.5)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)
@@ -228,16 +228,16 @@ def main():
             if metric>pre_metric:
                 pre_metric = metric
                 if params['model'] == 'eff':
-                    save_model(model, optimizer, schediler, epoch, params['model'] + params['eff'])
+                    save_model(model, optimizer, scheduler, epoch, params['model'] + str(params['eff']))
                 else:
                     save_model(model,optimizer,scheduler,epoch, params['model'])
                 model = model.to(device)
             print('Total F1_score : {metrics:.5f}'.format(metrics = metric))
             print('======================================================')
 
-            scheduler.step(metric)
+            #scheduler.step(metric)
 
-        #scheduler.step()
+        scheduler.step()
 
     writer.close()
 

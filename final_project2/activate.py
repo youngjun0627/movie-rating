@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from MODELS import slowfastnet
 from tensorboardX import SummaryWriter
 from UTILS.metrics import custom_metric
-from sklearn.metrics import f1_score, precision_score, roc_auc_score
+from sklearn.metrics import f1_score, precision_score, roc_auc_score, recall_score
 import torch.nn.functional as F
 
 class AverageMeter(object):
@@ -69,7 +69,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         loss1 = criterion1(outputs, labels)
         loss2 = criterion2(genre, genre_labels)
         loss3 = criterion3(age, age_labels)
-        loss = loss1+loss2+loss3
+        loss = (1.6*loss1)+(0.8*loss2)+(0.5*loss3)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -115,7 +115,9 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                 print_string = 'Loss : {loss:.5f}'.format(loss=running_loss/display)
                 print(print_string)
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
-                    score = roc_auc_score(np.array(target), np.array(pred))
+                    pred = np.array(pred)
+                    target = np.array(target)
+                    score = roc_auc_score(target, pred)
                     pred = (pred>0.5).astype(int)
 
                     precision = precision_score(np.array(target), np.array(pred), average='binary', zero_division=0)
@@ -181,7 +183,7 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             loss1 = criterion1(outputs, labels)
             loss2 = criterion2(genre, genre_labels)
             loss3 = criterion3(age, age_labels)
-            loss = (2*loss1)+(loss2*0.5)+(loss3*0.5)
+            loss = (1.6*loss1)+(0.8*loss2)+(0.5*loss3)
             #print(loss.item())
             running_loss+=loss.item()
             #print(outputs.shape, labels.shape)
@@ -220,10 +222,12 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             print(print_string)
             result = 0 
             for idx, (pred, target) in enumerate(zip(preds, targets)):
-                score = roc_auc_score(np.array(target), np.array(pred))
+                pred = np.array(pred)
+                target = np.array(target)
+                score = roc_auc_score(target, pred)
                 pred = (pred>0.5).astype(int)
-                precision = precision_score(np.array(target), np.array(pred), average='binary', zero_division=0)
-                recall = recall_score(np.array(target), np.array(pred), average='binary', zero_division=0)
+                precision = precision_score(target, pred, average='binary', zero_division=0)
+                recall = recall_score(target, pred, average='binary', zero_division=0)
                 print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} auroc_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
                 result += score
                 #precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=1)
