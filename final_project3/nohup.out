@@ -1,0 +1,92 @@
+102331
+1.7.1
+Loading dataset
+{0: {1: 302, 0: 167, 3: 60, 2: 148}, 1: {0: 79, 2: 237, 1: 213, 3: 148}, 2: {0: 80, 1: 249, 2: 209, 3: 139}, 3: {0: 119, 2: 260, 1: 184, 3: 114}}
+{0: {0: 78, 2: 88, 1: 146, 3: 26}, 1: {2: 128, 3: 80, 0: 25, 1: 105}, 2: {2: 97, 3: 71, 1: 138, 0: 32}, 3: {2: 137, 3: 55, 0: 33, 1: 113}}
+train_dataset : batch_size -> 4, step_size -> 170, frames -> 1024
+validation_dataset : batch_size -> 4, step_size -> 85, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+4651
+Traceback (most recent call last):
+  File "main.py", line 247, in <module>
+    main()
+  File "main.py", line 145, in main
+    model = slowfast_lstm.resnet50(class_num=params['num_classes'], label_num = params['label_num'], mode = params['mode'], vocab_size = len(vocab))
+  File "/home/uchanlee/uchanlee/uchan/final_project3/MODELS/slowfast_lstm.py", line 372, in resnet50
+    model = SlowFast(Bottleneck,[3,4,6,3],**kwargs)
+  File "/home/uchanlee/uchanlee/uchan/final_project3/MODELS/slowfast_lstm.py", line 118, in __init__
+    self.text_init_weights()
+  File "/home/uchanlee/uchanlee/uchan/final_project3/MODELS/slowfast_lstm.py", line 158, in text_init_weights
+    nn.init.kaiming_normal_(m,weight, mode="fan_out", nonlinearity='relu')
+NameError: name 'weight' is not defined
+83327
+1.7.1
+Loading dataset
+{0: {1: 302, 0: 167, 3: 60, 2: 148}, 1: {0: 79, 2: 237, 1: 213, 3: 148}, 2: {0: 80, 1: 249, 2: 209, 3: 139}, 3: {0: 119, 2: 260, 1: 184, 3: 114}}
+{0: {0: 78, 2: 88, 1: 146, 3: 26}, 1: {2: 128, 3: 80, 0: 25, 1: 105}, 2: {2: 97, 3: 71, 1: 138, 0: 32}, 3: {2: 137, 3: 55, 0: 33, 1: 113}}
+train_dataset : batch_size -> 4, step_size -> 170, frames -> 1024
+validation_dataset : batch_size -> 4, step_size -> 85, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+4651
+tensor([1.0135, 0.5604, 1.1436, 2.8208], device='cuda:0')
+tensor([2.1424, 0.7946, 0.7141, 1.1436], device='cuda:0')
+tensor([2.1156, 0.6797, 0.8098, 1.2176], device='cuda:0')
+tensor([1.4223, 0.9198, 0.6510, 1.4846], device='cuda:0')
+train gogosing
+49379
+1.7.1
+Loading dataset
+{0: {1: 368, 0: 179, 2: 174, 3: 67}, 1: {0: 81, 2: 287, 3: 181, 1: 239}, 2: {0: 90, 1: 322, 2: 220, 3: 156}, 3: {0: 117, 2: 307, 1: 234, 3: 130}}
+{0: {1: 174, 0: 95, 2: 92, 3: 33}, 1: {1: 135, 2: 128, 0: 55, 3: 76}, 2: {1: 160, 0: 43, 2: 115, 3: 76}, 3: {1: 122, 0: 74, 2: 142, 3: 56}}
+train_dataset : batch_size -> 4, step_size -> 197, frames -> 1024
+validation_dataset : batch_size -> 4, step_size -> 99, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+5108
+tensor([1.1006, 0.5353, 1.1322, 2.9403], device='cuda:1')
+tensor([2.4321, 0.8243, 0.6864, 1.0884], device='cuda:1')
+tensor([2.1889, 0.6118, 0.8955, 1.2628], device='cuda:1')
+tensor([1.6838, 0.8419, 0.6417, 1.5154], device='cuda:1')
+train gogosing
+----------------------------------------------
+lr : 2.5e-05
+Epoch:[1] step : [170/197]
+data_time: 0.092, batch_time: 4.855
+Loss : 3.42852
+Label sex_nudity -> precision_score : 0.21710 recall_score : 0.22234 f1_score : 0.21969
+Label violence_gore -> precision_score : 0.24325 recall_score : 0.26035 f1_score : 0.25151
+Label profinancy -> precision_score : 0.21932 recall_score : 0.22917 f1_score : 0.22414
+Label frightening_intense_scene -> precision_score : 0.24322 recall_score : 0.25928 f1_score : 0.25099
+Label Age -> precision_score : 0.27015 recall_score : 0.25564 f1_score : 0.26270
+----------------------------------------------
+lr : 3e-05
+Epoch:[2] step : [170/197]
+data_time: 0.095, batch_time: 4.894
+Loss : 3.37492
+Label sex_nudity -> precision_score : 0.21683 recall_score : 0.24661 f1_score : 0.23076
+Label violence_gore -> precision_score : 0.26413 recall_score : 0.26749 f1_score : 0.26580
+Label profinancy -> precision_score : 0.24873 recall_score : 0.25572 f1_score : 0.25218
+Label frightening_intense_scene -> precision_score : 0.25590 recall_score : 0.26218 f1_score : 0.25900
+Label Age -> precision_score : 0.27226 recall_score : 0.27553 f1_score : 0.27388
+----------------------------------------------
+lr : 3.5e-05
+Epoch:[3] step : [170/197]
+data_time: 0.102, batch_time: 4.852
+Loss : 3.33645
+Label sex_nudity -> precision_score : 0.26346 recall_score : 0.23710 f1_score : 0.24959
+Label violence_gore -> precision_score : 0.29488 recall_score : 0.30612 f1_score : 0.30039
+Label profinancy -> precision_score : 0.23280 recall_score : 0.24415 f1_score : 0.23834
+Label frightening_intense_scene -> precision_score : 0.25644 recall_score : 0.27787 f1_score : 0.26673
+Label Age -> precision_score : 0.25595 recall_score : 0.26781 f1_score : 0.26175
+----------------------------------------------
+lr : 3.9999999999999996e-05
+Epoch:[4] step : [170/197]
+data_time: 0.096, batch_time: 4.882
+Loss : 3.32218
+Label sex_nudity -> precision_score : 0.23035 recall_score : 0.25821 f1_score : 0.24349
+Label violence_gore -> precision_score : 0.28278 recall_score : 0.31846 f1_score : 0.29956
+Label profinancy -> precision_score : 0.25577 recall_score : 0.26194 f1_score : 0.25882
+Label frightening_intense_scene -> precision_score : 0.27522 recall_score : 0.33203 f1_score : 0.30097
+Label Age -> precision_score : 0.23167 recall_score : 0.23717 f1_score : 0.23439

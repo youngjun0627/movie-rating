@@ -141,7 +141,7 @@ def convert2_csv(path,k):
     train_f.close()
     val_f.close()
 
-
+    
 def convert3_csv(path,k):
 
     topics = ['sex_nudity','violence_gore','profianity','alcohol_drugs_smoking','frightening_intense_scene','plot']
@@ -161,6 +161,7 @@ def convert3_csv(path,k):
         with open(os.path.join(additionaltext_path, moviename),'r',encoding='utf-8-sig') as f:
             rdr = csv.reader(f)
             for line in rdr:
+                print(line)
                 if len(line[0].split('|'))==4:
                     additionaltext.append(moviename[:-4])
                     age = str(line[0].split('|')[0]).strip()
@@ -394,9 +395,22 @@ def convert5_csv(path,k):
         with open(os.path.join(additionaltext_path, moviename),'r',encoding='utf-8-sig') as f:
             rdr = csv.reader(f)
             for line in rdr:
-                if len(line[0].split('|'))==4:
+                #print(moviename[:-4], line)
+                checklist1 = ['All', 'G', '7', 'PG', '12','PG-13','15','R','18','19','(Banned)','NC-17','Limited']
+                checklist2 = ['Romance', 'Action', 'Horror', 'Crime', 'Thriller','Drama', 'Comedy', 'Adventure', 'Family']
+                age = None
+                genre = []
+                for _str in line[0].split('|'):
+                    for _check in checklist1:
+                        if _check in _str:
+                            age = _check
+                    for _check in checklist2:
+                        if _check in _str:
+                            genre.append(_check)                      
+                if age is not None and genre:
+                #if len(line[0].split('|'))==4:
                     additionaltext.append(moviename[:-4])
-                    age = str(line[0].split('|')[0]).strip()
+                    #age = str(line[0].split('|')[0]).strip()
                     gm.add(age)
                     if age=='All' or age =='G':
                         age = 0
@@ -408,16 +422,27 @@ def convert5_csv(path,k):
                         age = 2
                     elif age == '18' or age =='19' or age =='(Banned)' or age == 'NC-17' or age == 'Limited':
                         age = 3
-                    genre = line[0].split('|')[2]
+                    #genre = line[0].split('|')[2]
                     genre_dic = {'Romance':0, 'Action':0, 'Horror':0, 'Crime':0,'Thriller':0,'Drama':0, 'Comedy':0, 'Adventure':0, 'Family':0}
-                    for g in genre.split(','):
-                        if g.strip() in genre_dic.keys():
-                            genre_dic[g.strip()]+=1
-                    genre = list(genre_dic.values())
+                    for g in genre:
+                        if g in genre_dic.keys():
+                            genre_dic[g.strip()]=1
+                    genre = [genre_dic['Romance'], 
+                        genre_dic['Action'], 
+                        genre_dic['Horror'], 
+                        genre_dic['Crime'], 
+                        genre_dic['Thriller'], 
+                        genre_dic['Drama'], 
+                        genre_dic['Comedy'], 
+                        genre_dic['Adventure'], 
+                        genre_dic['Family']]
                     additional_dic[moviename[:-4]] = [age, genre]
                     #additional_dic[moviename[:-4]]=[line[0].split('|')[0], line[0].split('|')[2]]
-    print(len(additionaltext))
     sample_cnt = k
+    train_aver_len = 0
+    train_len = 0
+    val_aver_len = 0
+    val_len = 0
     for moviename in os.listdir(path):
         if moviename not in additionaltext:
             continue
@@ -453,25 +478,14 @@ def convert5_csv(path,k):
         stand_length = 1024
         audio_path = os.path.join('/home/uchanlee/uchanlee/uchan_dataset/AUDIO_IMAGES', moviename, 'audio.npy')
         if not (os.path.exists(audio_path)):
-            print(audio_path)
             continue
 
-        rare_cnt  = 1
-        if frames_length>stand_length*1.1:
+        if frames_length>stand_length+10:
             sample_cnt+=1
-            if sample_cnt%3!=0:
-                '''
-                if additional_dic[moviename][0]==0: 
-                    rare_cnt=2
-             
-                for i in range(4):
-                    if dic[topics[i]]==1:
-                        rare_cnt = 1
-                    else:
-                        rare_cnt+=1
-                '''
-                for _ in range(rare_cnt):
-                    train_wr.writerow([frames_length,videopath,
+            if (sample_cnt+k)%3!=0:
+                train_aver_len += frames_length
+                train_len+=1
+                train_wr.writerow([frames_length,videopath,
                         dic[topics[0]],
                         dic[topics[1]],
                         dic[topics[2]],
@@ -483,8 +497,9 @@ def convert5_csv(path,k):
                         audio_path
                        ])
             else:
-                if True or frames_length>stand_length+5:
-                    val_wr.writerow([frames_length,videopath,
+                val_aver_len += frames_length
+                val_len+=1
+                val_wr.writerow([frames_length,videopath,
                         dic[topics[0]],
                         dic[topics[1]],
                         dic[topics[2]],
@@ -494,8 +509,12 @@ def convert5_csv(path,k):
                         additional_dic[moviename][0],
                         additional_dic[moviename][1],
                         audio_path])
+            if frames_length<1034:
+                print(frames_length)
     train_f.close()
     val_f.close()
+    print(train_aver_len/train_len)
+    print(val_aver_len/val_len)
 
 def sample_video(video_path, FRAME_RATE, path_output):
     print(video_path)
@@ -526,8 +545,8 @@ if __name__=='__main__':
     #path = '/mnt/data/guest0/uchan'
     #sampling(path)
 
-    path = '/home/uchanlee/uchanlee/uchan_dataset/DATA4'
-    convert5_csv(path,2)
+    path = '/home/uchanlee/uchanlee/uchan_dataset/DATA'
+    convert5_csv(path,3)
 
     #c=0
     #with open('./train-for_user.csv', 'r', encoding='utf-8-sig') as f:

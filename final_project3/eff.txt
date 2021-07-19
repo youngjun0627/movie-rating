@@ -102,3 +102,13 @@ Label violence_gore -> precision_score : 0.79154 recall_score : 0.85921 f1_score
 Label profinancy -> precision_score : 0.67938 recall_score : 0.75561 f1_score : 0.68081
 Label frightening_intense_scene -> precision_score : 0.78291 recall_score : 0.84048 f1_score : 0.79173
 Age -> F1_score : 0.82209
+----------------------------------------------
+lr : 0.0082
+Epoch:[9] step : [160/173]
+data_time: 0.394, batch_time: 15.062
+Loss : 2.32382
+Label sex_nudity -> precision_score : 0.70639 recall_score : 0.80441 f1_score : 0.71902
+Label violence_gore -> precision_score : 0.80929 recall_score : 0.86443 f1_score : 0.82308
+Label profinancy -> precision_score : 0.75159 recall_score : 0.83123 f1_score : 0.76420
+Label frightening_intense_scene -> precision_score : 0.81369 recall_score : 0.85933 f1_score : 0.82597
+Age -> F1_score : 0.85821

@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 #from TRANSFORMS.transform import create_train_transform
 #from CONFIG.x3d_multi_plot_multitask_audio import params
@@ -8,23 +9,24 @@ from torchtext.vocab import Vocab
 from torch.utils.data import DataLoader
 
 def Collate_batch(batch):
-    video_list, text_list, offsets, label_list, genre_list, age_list, audio_list = [],[],[0],[], [], [], []
+    video_list, text_list, label_list, genre_list, age_list, audio_list = [],[],[], [], [], []
     for (_video, _text, _label, _age, _genre, _audio) in batch:
         label_list.append(_label)
         genre_list.append(_genre)
         age_list.append(_age)
         video_list.append(torch.tensor(_video,dtype=torch.float))
-        text_list.append(torch.tensor(_text, dtype=torch.long))
-        offsets.append(_text.shape[0])
+        if len(_text)>60:
+            text_list.append(torch.tensor(_text[:60], dtype=torch.long))
+        else:
+            text_list.append(torch.tensor(np.concatenate([_text, np.zeros(60-len(_text), dtype=np.long)]) , dtype=torch.long))
         audio_list.append(torch.tensor(_audio, dtype=torch.float))
     label_list = torch.tensor(label_list, dtype=torch.int64)
     genre_list = torch.tensor(genre_list, dtype=torch.int64)
     age_list = torch.tensor(age_list, dtype = torch.int64)
-    offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
-    text_list = torch.cat(text_list)
+    text_list = torch.stack(text_list)
     video_list = torch.stack(video_list)
     audio_list = torch.stack(audio_list)
-    return video_list, text_list, offsets, label_list, age_list, genre_list, audio_list
+    return video_list, text_list, label_list, age_list, genre_list, audio_list
 
 if __name__ == '__main__':
     

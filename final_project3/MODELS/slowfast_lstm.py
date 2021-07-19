@@ -56,7 +56,7 @@ class SlowFast(nn.Module):
     def __init__(self, block = Bottleneck, layers=[3,5,11,7], class_num=4, label_num = 5, dropout=0.7, mode='multi', vocab_size = 0):
         super(SlowFast, self).__init__()
         self.mode = mode
-        self.embed_dim = 64
+        self.embed_dim = 80
         self.audio_size = 1024
         self.class_num = class_num
         self.label_num = label_num
@@ -87,83 +87,148 @@ class SlowFast(nn.Module):
         self.slow_res5 = self._make_layer_slow(block,512,layers[3], stride=2, head_conv=3)
         
         self.dp = nn.Dropout(dropout)
-
-        self.classifier1 = nn.ModuleList([nn.Linear(256*32+self.embed_dim+self.audio_size, class_num) for _ in range(label_num)])
-        #self.classifier2 = nn.ModuleList([nn.Linear(256, class_num) for _ in range(label_num)])
+        
+        self.features_ln = nn.Sequential(
+                            nn.Linear(256*32 + self.embed_dim*2 + self.audio_size, 2048),
+                            nn.ReLU(inplace=True)
+                            )
+        self.classifier1 = nn.ModuleList([nn.Linear(2048, class_num) for _ in range(label_num)])
+        #self.classifier1 = nn.Linear(256*32 + self.embed_dim*2 + self.audio_size, (class_num*label_num) + 9 + 4)
         
         #self.classifier = nn.Linear(self.fast_inplanes + 2048 + self.embed_dim + self.audio_size, class_num * label_num)
         # text #
-        self.embedding = nn.EmbeddingBag(vocab_size, self.embed_dim)
+        self.embedding = nn.Embedding(vocab_size, self.embed_dim, padding_idx=0)
+        self.textdp = nn.Dropout(0.4)
+        #self.textconv = nn.Conv2d(self.embed_dim, self.embed_dim, kernel_size=1)
+        self.textcnn = nn.Sequential(
+                    nn.Conv1d(in_channels = 60, out_channels = self.embed_dim, kernel_size = 7, padding = 3),
+                    nn.ReLU(inplace = True),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim, out_channels = self.embed_dim, kernel_size = 7, padding = 3), 
+                    nn.ReLU(inplace = True),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1), 
+                    nn.ReLU(inplace = True),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim*2, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1), 
+                    nn.ReLU(inplace = True),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim*2, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1), 
+                    nn.AdaptiveAvgPool1d(1)
+                    ) 
         #self.textfc1 = nn.Linear(self.embed_dim, self.embed_dim)
         #self.textfc2 = nn.Linear(self.embed_dim, self.embed_dim)
         self.text_init_weights()
 
         # genre fc, age fc #
-        self.genrefc = nn.Linear(256*32 + self.embed_dim + self.audio_size, 9)
-        self.agefc = nn.Linear(256*32 + self.embed_dim + self.audio_size, 4)
+        self.genrefc = nn.Linear(2048, 9)
+        self.agefc = nn.Linear(2048, 4)
 
         self.extract_audio = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
                                         nn.BatchNorm2d(32),\
-                                        nn.LeakyReLU(),\
+                                        nn.LeakyReLU(inplace = True),\
                                         nn.MaxPool2d(2),\
+                                        nn.Dropout(0.2),
                                         nn.Conv2d(32, 64, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
                                         nn.BatchNorm2d(64),\
-                                        nn.LeakyReLU(),\
+                                        nn.LeakyReLU(inplace = True),\
                                         nn.MaxPool2d(2),\
+                                        nn.Dropout(0.2),\
                                         nn.Conv2d(64, 128, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
                                         nn.BatchNorm2d(128),\
-                                        nn.LeakyReLU(),\
+                                        nn.LeakyReLU(inplace = True),\
                                         nn.MaxPool2d(2),\
+                                        nn.Dropout(0.2),
                                         nn.Conv2d(128, 256, kernel_size=(3,11), stride=(1,3), padding=(1,1)),\
                                         nn.AdaptiveAvgPool2d(2)\
                                         )
-        self.lstm = nn.LSTM(self.fast_inplanes + 2048, hidden_size = 256, num_layers = 3, batch_first=False, bidirectional=True, dropout=0.3) 
+        self.audio_init_weights()
+        self.lstm = nn.LSTM(self.fast_inplanes + 2048, hidden_size = 128, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.4) 
+        
+        self.fast_dp = nn.Dropout(0.4)
+        self.slow_dp = nn.Dropout(0.4)
+        
+        self.final_dp1 = nn.Dropout(0.5)
+        self.final_dp2 = nn.Dropout(0.5)
+        self.final_dp3 = nn.Dropout(0.5)
+        
     def text_init_weights(self):
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
-        #self.textfc1.weight.data.uniform_(-initrange, initrange)
-        #self.textfc1.bias.data.zero_()
-        #self.textfc2.weight.data.uniform_(-initrange, initrange)
-        #self.textfc2.bias.data.zero_()
+        for m in self.textcnn:
+            if isinstance(m, nn.Conv1d):
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias,0)
+    
+    def audio_init_weights(self):
+        for m in self.extract_audio:
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity='leaky_relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias,0)
+
+
+            elif isinstance(m, nn.BatchNorm2d):
+                batchnorm_weight=1.0
+                if m.weight is not None:
+                    m.weight.data.fill_(batchnorm_weight)
+                if m.bias is not None:
+                    m.bias.data.zero_()
 
     def init_hidden(self,batch_size,device):
         hidden = (
-        torch.zeros(6,batch_size,256).requires_grad_().to(device),
-        torch.zeros(6,batch_size,256).requires_grad_().to(device),
+        torch.zeros(4,batch_size,128).requires_grad_().to(device),
+        torch.zeros(4,batch_size,128).requires_grad_().to(device),
         ) # num_layers, Batch, hidden size
         return hidden
     
 
-    def forward(self, input, text, offset, audio):
+    def forward(self, input, text, audio):
         video = []
-        for i in range(0,input.shape[2],64):
-            fast, lateral = self.FastPath(input[:,:,i:i+64:1,:,:])
-            slow = self.SlowPath(input[:,:,i:i+64:8,:,:],lateral)
+        for i in range(0,input.shape[2],32):
+            fast, lateral = self.FastPath(input[:,:,i:i+64:2,:,:])
+            slow = self.SlowPath(input[:,:,i:i+64:16,:,:],lateral)
             _video = torch.cat([slow,fast],dim=1)
             video.append(_video)
         video = torch.stack(video)
         hidden = self.init_hidden(input.size(0), input.device)
         video,_ = self.lstm(video, hidden)
         video = video.view(video.size(1),-1)
-        text = self.embedding(text,offset)
-        text = torch.tanh(text)
+
+        text = self.embedding(text)
+        text = self.textdp(text)
+        text = self.textcnn(text)
+        text = text.view(text.size(0), -1)
+        
+        #text = text.unsqueeze(2).unsqueeze(3)
+        #text = self.textconv(text).squeeze(3).squeeze(2)
+
         audio = self.extract_audio(audio)
         audio = audio.view(audio.shape[0], -1)
-        features = torch.cat([video, text, audio], dim=1)
+        features = torch.cat([self.final_dp1(video), self.final_dp2(text), self.final_dp3(audio)], dim=1)
+        #features = torch.cat([video, text, audio], dim=1)
+        features = self.features_ln(features)
         features = self.dp(features)
         # method 1
+        
         outputs = []
         for fc in self.classifier1:
             outputs.append(fc(features))
         outputs = torch.stack(outputs)
-        '''
-        # method 2
-        outputs = self.classifier(features)
-        outputs = outputs.view(self.label_num, -1, self.class_num)
-        '''
         genre = self.genrefc(features)
         age = self.agefc(features)
         return outputs, genre, age
+        # method 2
+        '''
+        outputs = self.classifier1(features)
+        #outputs = self.dp(outputs)
+        pred_class = outputs[:, :self.label_num * self.class_num]
+        pred_class = pred_class.reshape(self.label_num, -1, self.class_num)
+        genre = outputs[:,self.label_num * self.class_num : self.label_num * self.class_num + 9]
+        age = outputs[:,self.label_num * self.class_num + 9 : self.label_num * self.class_num + 9 + 4]
+        return pred_class, genre, age
+        '''
         '''
         outputs = []
         if self.mode=='multi':
@@ -186,25 +251,29 @@ class SlowFast(nn.Module):
     def SlowPath(self,input,lateral):
         x = self.slow_conv1(input)
         #print('slow1',x.shape)
-        x= self.slow_bn1(x)
+        x = self.slow_bn1(x)
         #print('slow2',x.shape)
         x = self.slow_relu(x)
         #print('slow3',x.shape)
         x = self.slow_maxpool(x)
         #print('slow4',x.shape)
         x = torch.cat([x,lateral[0]],dim=1)
+        x = self.slow_dp(x)
         #print('slow5',x.shape)
         x = self.slow_res2(x)
         #print('slow6',x.shape)
         x = torch.cat([x,lateral[1]],dim=1)
+        x = self.slow_dp(x)
         #print('slow7',x.shape)
         x = self.slow_res3(x)
         #print('slow8',x.shape)
         x = torch.cat([x,lateral[2]],dim=1)
+        x = self.slow_dp(x)
         #print('slow9',x.shape)
         x = self.slow_res4(x)
         #print('slow10',x.shape)
         x = torch.cat([x,lateral[3]],dim=1)
+        x = self.slow_dp(x)
         #print('slow11',x.shape)
         x = self.slow_res5(x)
         #print('slow12',x.shape)
@@ -223,6 +292,9 @@ class SlowFast(nn.Module):
         pool1 = self.fast_maxpool(x)
         lateral_p = self.lateral_p1(pool1)
         lateral.append(lateral_p)
+
+        pool1 = self.fast_dp(pool1)
+
         #print('fast2', pool1.shape)
         res2 = self.fast_res2(pool1)
         #print('res2', res2.shape)
@@ -230,17 +302,23 @@ class SlowFast(nn.Module):
         #print('lateral_res2', lateral_res2.shape)
         lateral.append(lateral_res2)
     
+        res2 = self.fast_dp(res2)
+        
         res3 = self.fast_res3(res2)
         #print('res3', res3.shape)
         lateral_res3 = self.lateral_res3(res3)
         #print('lateral_res3', lateral_res3.shape)
         lateral.append(lateral_res3)
 
+        res3 = self.fast_dp(res3)
+
         res4 = self.fast_res4(res3)
         #print('res4', res4.shape)
         lateral_res4 = self.lateral_res4(res4)
         #print('lateral_res4', lateral_res4.shape)
         lateral.append(lateral_res4)
+
+        res4 = self.fast_dp(res4)
 
         res5 = self.fast_res5(res4)
         #print('res5', x.shape)

@@ -1,0 +1,44 @@
+95277
+1.7.1
+Loading dataset
+{0: {1: 302, 0: 167, 3: 60, 2: 148}, 1: {0: 79, 2: 237, 1: 213, 3: 148}, 2: {0: 80, 1: 249, 2: 209, 3: 139}, 3: {0: 119, 2: 260, 1: 184, 3: 114}}
+{0: {0: 78, 2: 88, 1: 146, 3: 26}, 1: {2: 128, 3: 80, 0: 25, 1: 105}, 2: {2: 97, 3: 71, 1: 138, 0: 32}, 3: {2: 137, 3: 55, 0: 33, 1: 113}}
+train_dataset : batch_size -> 4, step_size -> 170, frames -> 1024
+validation_dataset : batch_size -> 4, step_size -> 85, frames -> 1024
+=========================================================================================================
+Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+tensor([1.0135, 0.5604, 1.1436, 2.8208], device='cuda:0')
+tensor([2.1424, 0.7946, 0.7141, 1.1436], device='cuda:0')
+tensor([2.1156, 0.6797, 0.8098, 1.2176], device='cuda:0')
+tensor([1.4223, 0.9198, 0.6510, 1.4846], device='cuda:0')
+train gogosing
+----------------------------------------------
+lr : 0.001
+Epoch:[1] step : [170/170]
+data_time: 0.127, batch_time: 3.007
+Loss : 3.43119
+Label sex_nudity -> precision_score : 0.25901 recall_score : 0.29262 f1_score : 0.27479
+Label violence_gore -> precision_score : 0.24949 recall_score : 0.25745 f1_score : 0.25341
+Label profinancy -> precision_score : 0.23530 recall_score : 0.25449 f1_score : 0.24452
+Label frightening_intense_scene -> precision_score : 0.25322 recall_score : 0.26130 f1_score : 0.25720
+Label Age -> precision_score : 0.26189 recall_score : 0.26723 f1_score : 0.26453
+----------------------------------------------
+lr : 0.001
+Epoch:[2] step : [170/170]
+data_time: 0.103, batch_time: 2.094
+Loss : 3.35325
+Label sex_nudity -> precision_score : 0.22310 recall_score : 0.23872 f1_score : 0.23065
+Label violence_gore -> precision_score : 0.23733 recall_score : 0.25558 f1_score : 0.24611
+Label profinancy -> precision_score : 0.24792 recall_score : 0.25665 f1_score : 0.25221
+Label frightening_intense_scene -> precision_score : 0.24453 recall_score : 0.25854 f1_score : 0.25134
+Label Age -> precision_score : 0.27151 recall_score : 0.31694 f1_score : 0.29247
+----------------------------------------------
+lr : 0.001
+Epoch:[3] step : [170/170]
+data_time: 0.095, batch_time: 2.087
+Loss : 3.31239
+Label sex_nudity -> precision_score : 0.25658 recall_score : 0.28133 f1_score : 0.26839
+Label violence_gore -> precision_score : 0.27086 recall_score : 0.28091 f1_score : 0.27580
+Label profinancy -> precision_score : 0.24239 recall_score : 0.25316 f1_score : 0.24766
+Label frightening_intense_scene -> precision_score : 0.26745 recall_score : 0.28041 f1_score : 0.27378
+Label Age -> precision_score : 0.26438 recall_score : 0.27795 f1_score : 0.27100

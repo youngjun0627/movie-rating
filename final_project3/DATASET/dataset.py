@@ -17,7 +17,7 @@ from collections import Counter
 from torchtext.data.utils import get_tokenizer
 
 class VideoDataset(Dataset):
-    def __init__(self, directory,size=224, mode = 'train', frame_sample_rate=1, cut_time=30, play_time=1024,transform=None,sub_classnum=4, label_num = 1, stride_num=8, use_plot=True, use_audio=True):
+    def __init__(self, directory,size=224, mode = 'train', frame_sample_rate=1, cut_time=1, play_time=1024,transform=None,sub_classnum=4, label_num = 1, stride_num=8, use_plot=True, use_audio=True):
         folder = directory
         self.size = size
         self.frame_sample_rate = frame_sample_rate
@@ -59,7 +59,7 @@ class VideoDataset(Dataset):
                 else: 
                     labels = []     
                     for _idx, label in enumerate(data[2:7]):
-                        if _idx==3:
+                        if _idx==3 and label_num==4:
                             continue
                         label = self.convert_label(label)
                         labels.append(label)
@@ -93,10 +93,12 @@ class VideoDataset(Dataset):
                 dic[_label]+=1
             self.class_weight = dic
         else:
-            #label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'drug_smoking', 4: 'frighten'}
-            #dic = {0:{}, 1: {}, 2:{}, 3:{}, 4:{}}
-            label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'frighten'}
-            dic = {0:{}, 1: {}, 2:{}, 3:{}}
+            if label_num==5:
+                label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'drug_smoking', 4: 'frighten'}
+                dic = {0:{}, 1: {}, 2:{}, 3:{}, 4:{}}
+            elif label_num==4:
+                label_names = {0:'sex', 1:'violence', 2:'profinancy', 3: 'frighten'}
+                dic = {0:{}, 1: {}, 2:{}, 3:{}}
             for _labels in self.labels:
                 for i, _label in enumerate(_labels):
                     if _label not in dic[i]:
@@ -110,14 +112,14 @@ class VideoDataset(Dataset):
         frame_length = self.frame_lengths[index]
 
         if self.mode=='train':
-            frame_indices = np.linspace(self.cut_time, frame_length-20, self.play_time+1)
+            frame_indices = np.linspace(self.cut_time, frame_length-5, self.play_time+1)
             frame_indices = list(map(int, frame_indices))
             candidate = frame_indices[:]
             frame_indices = []
             for i in range(self.play_time):
                 frame_indices.append(random.randrange(candidate[i], candidate[i+1]))
         elif self.mode=='validation':
-            frame_indices = np.linspace(self.cut_time, frame_length-20, self.play_time)
+            frame_indices = np.linspace(self.cut_time, frame_length-5, self.play_time)
             frame_indices = list(map(int, frame_indices))
         video = self.load_clip_video(video_path, frame_indices)
         label = self.labels[index]
@@ -268,7 +270,7 @@ class VideoDataset(Dataset):
             for idx, la in enumerate(label):
                 weights[idx][la]+=1
         for i in range(9):
-            weights[i] = weights[i][0]/weights[i][1]
+            weights[i] = (weights[i][0]/(weights[i][1]*9))
         weights = torch.tensor(weights)
         return weights
 
@@ -284,8 +286,8 @@ if __name__=='__main__':
 
     
     transform = create_train_transform(True,True,True,True,size=112)
-    path = '/home/uchanlee/uchanlee/uchan/final_project/UTILS'
-    a = VideoDataset(path, transform = None, size=224,label_num=4, sub_classnum=4, use_plot=False, mode='validation')
+    path = '/home/uchanlee/uchanlee/uchan/final_project3/UTILS'
+    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=False, mode='train')
     
     plots = a.plots
     counter = Counter()
@@ -294,6 +296,21 @@ if __name__=='__main__':
         counter.update(tokenizer(plot))
     vocab = Vocab(counter,min_freq=1)
     a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_class_weight2())
+    print(a.get_age_weight2())
+    print(a.get_genre_weight2())
+    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=False, mode='validation')
+    
+    plots = a.plots
+    counter = Counter()
+    tokenizer = get_tokenizer('basic_english')
+    for plot in plots:
+        counter.update(tokenizer(plot))
+    vocab = Vocab(counter,min_freq=1)
+    a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_class_weight2())
+    print(a.get_age_weight2())
+    print(a.get_genre_weight2())
     '''
     r_mean = 0
     r_std = 0
@@ -314,7 +331,6 @@ if __name__=='__main__':
     '''
         
     #print(a.get_class_weight())
-    print(a.get_genre_weight2())
     #print(a.get_age_weight2())
     #print(a.get_age_weight())
     #for i in range(len(a.filenames)):

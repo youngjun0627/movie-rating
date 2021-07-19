@@ -17,7 +17,7 @@ from collections import Counter
 from torchtext.data.utils import get_tokenizer
 
 class VideoDataset(Dataset):
-    def __init__(self, directory,size=224, mode = 'train', frame_sample_rate=1, cut_time=30, play_time=1024,transform=None,sub_classnum=4, label_num = 1, stride_num=8, use_plot=True, use_audio=True):
+    def __init__(self, directory,size=224, mode = 'train', frame_sample_rate=1, cut_time=1, play_time=1024,transform=None,sub_classnum=4, label_num = 1, stride_num=8, use_plot=True, use_audio=True):
         folder = directory
         self.size = size
         self.frame_sample_rate = frame_sample_rate
@@ -111,14 +111,14 @@ class VideoDataset(Dataset):
         frame_length = self.frame_lengths[index]
 
         if self.mode=='train':
-            frame_indices = np.linspace(self.cut_time, frame_length-20, self.play_time+1)
+            frame_indices = np.linspace(self.cut_time, frame_length-5, self.play_time+1)
             frame_indices = list(map(int, frame_indices))
             candidate = frame_indices[:]
             frame_indices = []
             for i in range(self.play_time):
                 frame_indices.append(random.randrange(candidate[i], candidate[i+1]))
         elif self.mode=='validation':
-            frame_indices = np.linspace(self.cut_time, frame_length-20, self.play_time)
+            frame_indices = np.linspace(self.cut_time, frame_length-5, self.play_time)
             frame_indices = list(map(int, frame_indices))
         video = self.load_clip_video(video_path, frame_indices)
         label = self.labels[index]
@@ -271,7 +271,7 @@ class VideoDataset(Dataset):
             weights[k]=v
         print('age',weights)
         weights = torch.tensor(weights)
-        weights = torch.tensor([sum(weights)/(x*self.sub_classnum) for x in weights])
+        weights = torch.tensor([sum(weights)/(x*4) for x in weights])
         return weights
 
     def get_genre_weight2(self):
@@ -282,7 +282,7 @@ class VideoDataset(Dataset):
                 weights[idx][la]+=1
         print('genre',weights)
         for i in range(9):
-            weights[i] = weights[i][0]/weights[i][1]
+            weights[i] = weights[i][0]/(weights[i][1]*9)
 
         weights = torch.tensor(weights)
         return weights
@@ -300,7 +300,7 @@ if __name__=='__main__':
     
     transform = create_train_transform(True,True,True,True,size=112)
     path = '/home/uchanlee/uchanlee/uchan/final_project/UTILS'
-    a = VideoDataset(path, transform = None, size=224,label_num=4, sub_classnum=1, use_plot=False, mode='validation')
+    a = VideoDataset(path, transform = None, size=224,label_num=4, sub_classnum=1, use_plot=False, mode='train')
     
     plots = a.plots
     counter = Counter()
@@ -309,6 +309,7 @@ if __name__=='__main__':
         counter.update(tokenizer(plot))
     vocab = Vocab(counter,min_freq=1)
     a.generate_text_pipeline(vocab,tokenizer)
+    print(a.get_class_weight2())
     print(a.get_age_weight2())
     print(a.get_genre_weight2())
     '''
@@ -331,7 +332,7 @@ if __name__=='__main__':
     '''
         
     #print(a.get_class_weight())
-    print(a.get_class_weight2().requires_grad)
+    #print(a.get_class_weight2().requires_grad)
     #print(a.get_age_weight2())
     #print(a.get_age_weight())
     #for i in range(len(a.filenames)):

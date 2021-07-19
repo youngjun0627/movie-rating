@@ -117,7 +117,7 @@ class EfficientNet3D(nn.Module):
         self._global_params = global_params
         self._blocks_args = blocks_args
         self.mode = mode
-        self.embed_dim = 64
+        self.embed_dim = 128
         self.audio_size = 1024
         self.label_num = label_num
         self.num_classes = class_num
@@ -163,14 +163,34 @@ class EfficientNet3D(nn.Module):
         self._swish = MemoryEfficientSwish()
 
 
-        self.classifier1 = nn.ModuleList([nn.Linear(256*32+self.embed_dim+self.audio_size, self.num_classes) for _ in range(self.label_num)])
-        # text #
-        self.embedding = nn.EmbeddingBag(vocab_size, self.embed_dim)
+        self.classifier1 = nn.ModuleList([nn.Linear((256*32)+(self.embed_dim*2)+self.audio_size, self.num_classes) for _ in range(self.label_num)])
+        
+# text #
+        self.embedding = nn.Embedding(vocab_size, self.embed_dim, padding_idx=0)
+        self.textdp = nn.Dropout(0.4)
+        #self.textconv = nn.Conv2d(self.embed_dim, self.embed_dim, kernel_size=1)
+        self.textcnn = nn.Sequential(
+                    nn.Conv1d(in_channels = 60, out_channels = self.embed_dim, kernel_size = 7, padding = 3),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim, out_channels = self.embed_dim, kernel_size = 7, padding = 3),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim*2, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim*2, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1),
+                    nn.ReLU(),
+                    nn.AdaptiveAvgPool1d(1)
+                    )
         self.text_init_weights()
 
         # genre fc, age fc #
-        self.genrefc = nn.Linear(256*32 + self.embed_dim + self.audio_size, 9)
-        self.agefc = nn.Linear(256*32 + self.embed_dim + self.audio_size, 4)
+        self.genrefc = nn.Linear((256*32) + (self.embed_dim*2) + self.audio_size, 9)
+        self.agefc = nn.Linear((256*32) + (self.embed_dim*2) + self.audio_size, 4)
 
 
         self.extract_audio = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
@@ -233,7 +253,7 @@ class EfficientNet3D(nn.Module):
 
         return x
 
-    def forward(self, inputs, text, offset, audio):
+    def forward(self, inputs, text, audio):
         """ Calls extract_features to extract features, applies final linear layer, and returns logits. """
         bs = inputs.size(0)
         video = []
@@ -250,8 +270,11 @@ class EfficientNet3D(nn.Module):
         video, _ = self.lstm(video, hidden)
         video = video.view(video.size(1),-1)
 
-        text = self.embedding(text,offset)
-        text = torch.tanh(text)
+        text = self.embedding(text)
+        text = self.textdp(text)
+        text = self.textcnn(text)
+        text = text.view(text.size(0), -1)
+        
         audio = self.extract_audio(audio)
         audio = audio.view(audio.shape[0], -1)
         features = torch.cat([video, text, audio], dim=1)

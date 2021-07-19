@@ -47,7 +47,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         raise Exception('{} is not supported mode'.format(mode))
     age_preds = []
     age_targets = []
-    for step, (inputs,text,offset, labels, age, genre, audio) in enumerate(train_dataloader):
+    for step, (inputs,text, labels, age, genre, audio) in enumerate(train_dataloader):
         data_time.update(time.time()-end)
         #print(inputs.shape)
         #print(text.shape)
@@ -57,7 +57,6 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         #print(audio.shape)
         inputs=inputs.to(device)
         text = text.to(device)
-        offset = offset.to(device)
         #print(inputs.shape)
         labels = labels.long().to(device)
         genre_labels = genre.to(device)
@@ -65,7 +64,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
 
         audio = audio.to(device)
 
-        outputs, genre, age = model(inputs,text,offset, audio)
+        outputs, genre, age = model(inputs,text, audio)
         loss1 = criterion1(outputs, labels)
         loss2 = criterion2(genre, genre_labels)
         loss3 = criterion3(age, age_labels)
@@ -116,15 +115,18 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
                 print(print_string)
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
 
-                    score = f1_score(np.array(target), np.array(pred), average='macro')
+                    #score = f1_score(np.array(target), np.array(pred), average='macro')
                     precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=0)
                     recall = recall_score(np.array(target), np.array(pred), average='macro', zero_division=0)
+                    score = (precision*recall*2)/(precision+recall)
                     print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} f1_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
                     #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                     print(print_string)
                 
-                score = f1_score(np.array(age_targets), np.array(age_preds), average = 'macro')
-                print_string = '{label_name} -> F1_score : {metric:.5f}'.format(label_name='Age', metric=score)
+                precision = precision_score(np.array(age_targets), np.array(age_preds), average='macro', zero_division=0)
+                recall = recall_score(np.array(age_targets), np.array(age_preds), average='macro', zero_division=0)
+                score = (precision*recall*2)/(precision+recall)
+                print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} f1_score : {metric3:.5f}'.format(label_name='Age', metric=precision, metric2 = recall, metric3 = score)
                     #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                 print(print_string)
                 age_targets.clear()
@@ -158,11 +160,10 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
     age_targets = []
     running_loss = 0
     with torch.no_grad():
-        for step, (inputs,text,offset, labels, age, genre, audio) in enumerate(val_dataloader):
+        for step, (inputs,text, labels, age, genre, audio) in enumerate(val_dataloader):
             data_time.update(time.time()-end)
             inputs=inputs.to(device)
             text = text.to(device)
-            offset = offset.to(device)
             #print(inputs.shape)
             labels = labels.long().to(device)
             genre_labels = genre.to(device)
@@ -170,7 +171,7 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
 
             audio = audio.to(device)
 
-            outputs, genre, age = model(inputs,text,offset, audio)
+            outputs, genre, age = model(inputs,text, audio)
             outputs = outputs.to(device)
             genre = genre.to(device)
             age = age.to(device)
@@ -218,16 +219,19 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             print(print_string)
             result = 0 
             for idx, (pred, target) in enumerate(zip(preds, targets)):
-                score = f1_score(np.array(target), np.array(pred), average='macro')
-                result+=score
+                #score = f1_score(np.array(target), np.array(pred), average='macro')
                 precision = precision_score(np.array(target), np.array(pred), average='macro', zero_division=0)
                 recall = recall_score(np.array(target), np.array(pred), average='macro', zero_division=0)
+                score = (precision*recall*2)/(precision+recall)
+                result+=score
                 print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} f1_score : {metric3:.5f}'.format(label_name=label_dic[idx], metric=precision, metric2 = recall, metric3 = score)
 
                 #print_string = 'Label {label_name} -> F1_score : {metric:.5f}  Precision : {precision_score:.5f}'.format(label_name=label_dic[idx], metric=score, precision_score = precision)
                 print(print_string)
-            score = f1_score(np.array(age_targets), np.array(age_preds), average = 'macro')
-            print_string = '{label_name} -> F1_score : {metric:.5f}'.format(label_name='Age', metric=score)
+            precision = precision_score(np.array(age_targets), np.array(age_preds), average='macro', zero_division=0)
+            recall = recall_score(np.array(age_targets), np.array(age_preds), average='macro', zero_division=0)
+            score = (precision*recall*2)/(precision+recall)
+            print_string = 'Label {label_name} -> precision_score : {metric:.5f} recall_score : {metric2:.5f} f1_score : {metric3:.5f}'.format(label_name='Age', metric=precision, metric2 = recall, metric3 = score)
             print(print_string)
             result/=label_num
             #result2/=label_num

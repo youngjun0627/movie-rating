@@ -1,10 +1,10 @@
 
 params = dict()
-params['num_classes']=1
+params['num_classes']=4
 params['dataset'] = '/home/uchanlee/uchanlee/uchan/final_project3/UTILS'
 params['use_plot'] = True
 params['epoch_num']=300
-params['label_num'] = 5
+params['label_num'] = 4
 params['mode']='multi'
 params['batch_size']=2
 params['step']=50
@@ -12,9 +12,9 @@ params['model'] = 'x3d_multitask'
 params['size']=112
 params['num_workers']=4
 params['momentum']=0.9
-params['learning_rate']=0.015
+params['learning_rate']=0.0025
 params['weight_decay']=1e-5
-params['display']=300
+params['display']=330
 params['clip_len']=1024
 params['stride'] = 1
 params['pretrained']=''#'saved_model/saved_model_50.pth'

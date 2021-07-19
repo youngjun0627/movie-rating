@@ -198,6 +198,7 @@ class ResNet(nn.Module):
         self.task = task
         self.n_classes = n_classes
         self.label_num = label_num
+        self.embed_dim=128
         self.audio_size = 1024
         self.in_planes = block_inplanes[0][1]
 
@@ -251,41 +252,57 @@ class ResNet(nn.Module):
         elif task == 'loc':
             self.avgpool = nn.AdaptiveAvgPool3d((None, 1, 1))
         self.fc1 = nn.Conv3d(block_inplanes[3][0], 2048, bias=False, kernel_size=1, stride=1)
-        self.fcs = nn.ModuleList([nn.Linear(128*32+embed_dim+self.audio_size, n_classes) for _ in range(label_num)])
+        self.fcs = nn.ModuleList([nn.Linear((256*32)+(2*self.embed_dim)+self.audio_size, n_classes) for _ in range(label_num)])
         '''
         self.classifier = nn.Sequential(
                                         nn.Linear(2048+embed_dim+self.audio_size, 256),\
                                         nn.Linear(256, n_classes * label_num))
         '''
-        self.classifier = nn.Linear(128*32+embed_dim+self.audio_size, n_classes * label_num)
+        #self.classifier = nn.Linear(256*32+embed_dim+self.audio_size, n_classes * label_num)
         self.dropout = nn.Dropout(dropout)
 
-        self.embedding = nn.EmbeddingBag(vocab_size, embed_dim)
-        #self.textfc1 = nn.Linear(embed_dim, embed_dim)
+        self.embedding = nn.Embedding(vocab_size, self.embed_dim, padding_idx=0)
+        self.textdp = nn.Dropout(0.4)
+        #self.textconv = nn.Conv2d(self.embed_dim, self.embed_dim, kernel_size=1)
+        self.textcnn = nn.Sequential(
+                    nn.Conv1d(in_channels = 60, out_channels = self.embed_dim, kernel_size = 7, padding = 3),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim, out_channels = self.embed_dim, kernel_size = 7, padding = 3),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim*2, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1),
+                    nn.ReLU(),
+                    nn.MaxPool1d(kernel_size=2),
+                    nn.Conv1d(in_channels = self.embed_dim*2, out_channels = self.embed_dim*2, kernel_size = 3, padding = 1),
+                    nn.ReLU(),
+                    nn.AdaptiveAvgPool1d(1)
+                    )
         self.text_init_weights()
 
-        self.genrefc = nn.Linear(128*32+embed_dim+self.audio_size, 9)
-        self.agefc = nn.Linear(128*32+embed_dim+self.audio_size, 4)
-        self.extract_audio = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3,5), stride=(1,2), padding=(1,0)),\
-                                        nn.BatchNorm2d(32),
-                                        nn.LeakyReLU(),
-                                        nn.MaxPool2d((1,2)),
-                                        nn.Conv2d(32, 64, kernel_size=(3,5), stride=(1,2), padding=(1,1)),
-                                        nn.BatchNorm2d(64),
-                                        nn.LeakyReLU(),
-                                        nn.MaxPool2d((1,2)),
-                                        nn.Conv2d(64, 128, kernel_size=(3,5), stride=(1,2), padding=(1,1)),
-                                        nn.BatchNorm2d(128),
-                                        nn.LeakyReLU(),
-                                        nn.MaxPool2d((1,2)),
-                                        nn.Conv2d(128, 256, kernel_size=(3,5), stride=(1,2), padding=(0,1)),
-                                        nn.BatchNorm2d(256),
-                                        nn.LeakyReLU(),
-                                        nn.MaxPool2d(2),
-                                        nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=(0,1)),
-                                        nn.AdaptiveAvgPool2d(2)
-                                        ) 
-        self.lstm = nn.LSTM(2048, hidden_size = 128, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.3)
+
+        self.genrefc = nn.Linear((256*32)+(2*self.embed_dim)+self.audio_size, 9)
+        self.agefc = nn.Linear((256*32)+(2*self.embed_dim)+self.audio_size, 4)
+        self.extract_audio = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
+                                        nn.BatchNorm2d(32),\
+                                        nn.LeakyReLU(),\
+                                        nn.MaxPool2d(2),\
+                                        nn.Conv2d(32, 64, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
+                                        nn.BatchNorm2d(64),\
+                                        nn.LeakyReLU(),\
+                                        nn.MaxPool2d(2),\
+                                        nn.Conv2d(64, 128, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
+                                        nn.BatchNorm2d(128),\
+                                        nn.LeakyReLU(),\
+                                        nn.MaxPool2d(2),\
+                                        nn.Conv2d(128, 256, kernel_size=(3,11), stride=(1,3), padding=(1,1)),\
+                                        nn.AdaptiveAvgPool2d(2)\
+                                        )
+
+        self.lstm = nn.LSTM(2048, hidden_size = 256, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.3)
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
@@ -295,8 +312,8 @@ class ResNet(nn.Module):
     def init_hidden(self,batch_size,device):
          
         hidden = (
-                torch.zeros(4,batch_size,128).requires_grad_().to(device),
-                torch.zeros(4,batch_size,128).requires_grad_().to(device),
+                torch.zeros(4,batch_size,256).requires_grad_().to(device),
+                torch.zeros(4,batch_size,256).requires_grad_().to(device),
                 ) # num_layers, Batch, hidden size
         return hidden    
 
@@ -371,7 +388,7 @@ class ResNet(nn.Module):
         return count
 
 
-    def forward(self, x, text, offset, audio):
+    def forward(self, x, text, audio):
         video = []
         for i in range(0, x.shape[2], 64):
             _video = self.conv1_s(x[:,:,i:i+64:1,:,:])
@@ -401,8 +418,10 @@ class ResNet(nn.Module):
         video, _ = self.lstm(video, hidden)
         video = video.view(video.size(1),-1)
 
-        text = self.embedding(text, offset)
-        #text = self.textfc1(text)
+        text = self.embedding(text)
+        text = self.textdp(text)
+        text = self.textcnn(text)
+        text = text.view(text.size(0), -1)
 
         audio = self.extract_audio(audio)
         audio = audio.view(audio.shape[0], -1)
@@ -416,7 +435,7 @@ class ResNet(nn.Module):
         #x = self.fc2(x).unsqueeze(2) # B C 1
         x = torch.cat([video, text, audio], dim=1)
         x = self.dropout(x)
-
+        '''
         outputs = self.classifier(x)
         outputs = outputs.view(self.label_num, -1, self.n_classes)
         '''
@@ -424,7 +443,7 @@ class ResNet(nn.Module):
         for fc in self.fcs:
             outputs.append(fc(x))
         outputs = torch.stack(outputs)
-        '''
+        
         genre = self.genrefc(x)
         age = self.agefc(x)
 
