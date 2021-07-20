@@ -87,12 +87,13 @@ class SlowFast(nn.Module):
         self.slow_res5 = self._make_layer_slow(block,512,layers[3], stride=2, head_conv=3)
         
         self.dp = nn.Dropout(dropout)
-        
+        '''
         self.features_ln = nn.Sequential(
-                            nn.Linear(256*32 + self.embed_dim*2 + self.audio_size, 2048),
+                            nn.Linear(64*32 + self.embed_dim*2 + self.audio_size, 2048),
                             nn.ReLU(inplace=True)
                             )
-        self.classifier1 = nn.ModuleList([nn.Linear(2048, class_num) for _ in range(label_num)])
+        '''
+        self.classifier1 = nn.ModuleList([nn.Linear(2048 + self.embed_dim*2 + self.audio_size, class_num) for _ in range(label_num)])
         #self.classifier1 = nn.Linear(256*32 + self.embed_dim*2 + self.audio_size, (class_num*label_num) + 9 + 4)
         
         #self.classifier = nn.Linear(self.fast_inplanes + 2048 + self.embed_dim + self.audio_size, class_num * label_num)
@@ -121,8 +122,8 @@ class SlowFast(nn.Module):
         self.text_init_weights()
 
         # genre fc, age fc #
-        self.genrefc = nn.Linear(2048, 9)
-        self.agefc = nn.Linear(2048, 4)
+        self.genrefc = nn.Linear(2048+self.embed_dim*2+self.audio_size, 9)
+        self.agefc = nn.Linear(2048+self.embed_dim*2+self.audio_size, 4)
 
         self.extract_audio = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
                                         nn.BatchNorm2d(32),\
@@ -143,7 +144,7 @@ class SlowFast(nn.Module):
                                         nn.AdaptiveAvgPool2d(2)\
                                         )
         self.audio_init_weights()
-        self.lstm = nn.LSTM(self.fast_inplanes + 2048, hidden_size = 128, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.4) 
+        self.lstm = nn.LSTM(self.fast_inplanes + 2048, hidden_size = 32, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.4) 
         
         self.fast_dp = nn.Dropout(0.4)
         self.slow_dp = nn.Dropout(0.4)
@@ -178,8 +179,8 @@ class SlowFast(nn.Module):
 
     def init_hidden(self,batch_size,device):
         hidden = (
-        torch.zeros(4,batch_size,128).requires_grad_().to(device),
-        torch.zeros(4,batch_size,128).requires_grad_().to(device),
+        torch.zeros(4,batch_size,32).requires_grad_().to(device),
+        torch.zeros(4,batch_size,32).requires_grad_().to(device),
         ) # num_layers, Batch, hidden size
         return hidden
     
@@ -208,8 +209,8 @@ class SlowFast(nn.Module):
         audio = audio.view(audio.shape[0], -1)
         features = torch.cat([self.final_dp1(video), self.final_dp2(text), self.final_dp3(audio)], dim=1)
         #features = torch.cat([video, text, audio], dim=1)
-        features = self.features_ln(features)
-        features = self.dp(features)
+        #features = self.features_ln(features)
+        #features = self.dp(features)
         # method 1
         
         outputs = []
