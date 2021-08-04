@@ -1,0 +1,139 @@
+import os
+import cv2
+import numpy as np
+from torch.utils.data import DataLoader, Dataset
+import csv
+from albumentations.pytorch.functional import img_to_tensor
+import albumentations
+import torch
+
+def create_train_transform(flip,
+        noise,
+        cutout,
+        resize,
+        size = 112,
+        bright = True):
+    
+    translist = []
+    
+    if flip:
+        translist+=[albumentations.OneOf([
+                albumentations.Rotate(limit=30),
+                albumentations.IAAPiecewiseAffine(),
+                albumentations.ShiftScaleRotate(
+                shift_limit=0.02,
+                scale_limit=0.3,
+                rotate_limit=10,
+                ),
+                albumentations.HorizontalFlip()],p=0.7)]
+
+    if noise:
+        translist+=[albumentations.OneOf([
+            albumentations.MotionBlur(blur_limit=6),
+            albumentations.MedianBlur(blur_limit=5),
+            albumentations.OpticalDistortion(),
+            albumentations.CLAHE(),
+            albumentations.GaussNoise(var_limit=(5.0,20.0))], p=0.75)]
+
+    if bright:
+        translist+=[albumentations.OneOf([
+          albumentations.RandomBrightness(limit=0.6),
+          #albumentations.Sharpen(),
+          albumentations.ColorJitter(),
+          albumentations.RandomBrightnessContrast(brightness_limit=0.6, contrast_limit=0.6)],p=0.7)]
+
+    if cutout:
+        translist+=[albumentations.OneOf([
+            albumentations.CoarseDropout(),
+            albumentations.Cutout(max_h_size = int(size * np.random.rand(1)*0.5), max_w_size = int(size * np.random.rand(1)*0.5), num_holes=np.random.randint(1,3))
+            ],p=0.75)]
+            
+    if resize:
+        translist+=[albumentations.Resize(size+16, size+16, interpolation=2)]
+        translist+=[albumentations.RandomCrop(size,size,always_apply=True)]
+
+    #translist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
+    #translist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
+    #trainlist+=[albumentations.Normalize(mean=(0.2539, 0.2348, 0.2189), std = (0.2195,0.2110,0.2061))]
+    #translist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
+    translist+=[albumentations.Normalize(mean=(0.1977, 0.2115, 0.2275), std = (0.2177, 0.2227, 0.2317))]
+    #translist+=[albumentations.Normalize(mean=(0.2527, 0.2343, 0.2177), std = (0.2171, 0.2082, 0.2026))]
+    transform = albumentations.Compose(translist)
+    return transform
+
+def create_val_transform(resize,size=112):
+    vallist = []
+    if resize:
+        vallist+=[albumentations.Resize(size+16,size+16, interpolation=2)]
+        vallist+=[albumentations.CenterCrop(size,size,always_apply=True)]
+
+    #vallist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
+    #vallist+=[albumentations.Normalize(mean=(0.45, 0.45, 0.45), std = (0.225, 0.225, 0.225))]
+    #vallist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
+    vallist+=[albumentations.Normalize(mean=(0.1977, 0.2115, 0.2275), std = (0.2177, 0.2227, 0.2317))]
+    #vallist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
+    #vallist+=[albumentations.Normalize(mean=(0.2597, 0.2405, 0.2231), std = (0.2276,0.2196,0.2160))]
+    transform = albumentations.Compose(vallist)
+    return transform
+
+'''
+import os
+import cv2
+import numpy as np
+from torch.utils.data import DataLoader, Dataset
+import csv
+from albumentations.pytorch.functional import img_to_tensor
+import albumentations
+import torch
+
+def create_train_transform(flip,
+        noise,
+        cutout,
+        resize,
+        size = 112,
+        bright = True):
+    
+    translist = []
+    if resize:
+        translist+=[albumentations.Resize(size+30, size+30)]
+        translist+=[albumentations.RandomCrop(size,size,always_apply=True)]
+    if flip:
+        translist+=[albumentations.OneOf([
+                albumentations.HorizontalFlip()],p=0.5)]
+
+    if noise:
+        translist+=[albumentations.OneOf([
+            albumentations.MotionBlur(blur_limit=5),
+            albumentations.MedianBlur(blur_limit=5),
+            albumentations.GaussianBlur(),
+            albumentations.GaussNoise(var_limit=(5.0,20.0))], p=0.75)]
+
+    if bright:
+        translist+=[albumentations.RandomBrightness(limit=0.2, always_apply=False,p=0.7)]
+
+    if cutout:
+        translist+=[albumentations.Cutout(max_h_size = int(size*0.1), max_w_size=int(size*0.1), num_holes=3,p=0.65)]
+
+    #translist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
+    #translist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
+    #trainlist+=[albumentations.Normalize(mean=(0.2539, 0.2348, 0.2189), std = (0.2195,0.2110,0.2061))]
+    translist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
+
+    #translist+=[albumentations.Normalize(mean=(0.2527, 0.2343, 0.2177), std = (0.2171, 0.2082, 0.2026))]
+    transform = albumentations.Compose(translist)
+    return transform
+
+def create_val_transform(resize,size=112):
+    vallist = []
+    if resize:
+        vallist+=[albumentations.Resize(size,size)]
+
+    #vallist+=[albumentations.Normalize(mean=(0.2248, 0.2080, 0.1929), std = (0.2231, 0.2140, 0.2083))]
+    #vallist+=[albumentations.Normalize(mean=(0.45, 0.45, 0.45), std = (0.225, 0.225, 0.225))]
+    vallist+=[albumentations.Normalize(mean=(0.2580, 0.2360, 0.2215), std = (0.2235, 0.2132, 0.2100))]
+    #vallist+=[albumentations.Normalize(mean=(0.2481, 0.2292, 0.2131), std = (0.2167,0.2071,0.2014))]
+    #vallist+=[albumentations.Normalize(mean=(0.2597, 0.2405, 0.2231), std = (0.2276,0.2196,0.2160))]
+    transform = albumentations.Compose(vallist)
+    return transform
+'''
+
