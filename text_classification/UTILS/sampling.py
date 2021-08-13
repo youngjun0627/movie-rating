@@ -438,12 +438,23 @@ def convert5_csv(path,k):
                         genre_dic['Family']]
                     additional_dic[moviename[:-4]] = [age, genre]
                     #additional_dic[moviename[:-4]]=[line[0].split('|')[0], line[0].split('|')[2]]
+    plot_dic = {}
+    with open('/home/uchanlee/uchanlee/uchan_dataset/movie_id_plots_synopsis.csv', 'r', encoding='utf-8-sig') as f:
+        rdr = csv.reader(f)
+        for line in rdr:
+            moviename, id, plots, synopsis = line
+            if synopsis=='\n///\n///':
+                continue
+            plot_dic[moviename] = ''.join(synopsis.split('///'))
+
     sample_cnt = k
     train_aver_len = 0
     train_len = 0
     val_aver_len = 0
     val_len = 0
     for moviename in os.listdir(path):
+        if moviename not in plot_dic:
+            continue
         if moviename not in additionaltext:
             continue
         cnt+=1
@@ -471,7 +482,7 @@ def convert5_csv(path,k):
                         if meta == 'Severe':
                             dic[topics[i]]=3
                     else:
-                        dic[topics[i]]=meta
+                        dic[topics[i]]=plot_dic[moviename]
 
         data_f.close()
         #if (cnt+k)%5!=0:

@@ -97,7 +97,7 @@ class SlowFast(nn.Module):
         self.genrefc = nn.Linear(2048, 9)
         self.agefc = nn.Linear(2048, 4)
 
-        self.lstm = nn.LSTM(self.fast_inplanes + 2048, hidden_size = 32, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.4) 
+        self.lstm = nn.LSTM(self.fast_inplanes + 2048, hidden_size = 64, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.4) 
         
         self.fast_dp = nn.Dropout(0.4)
         self.slow_dp = nn.Dropout(0.4)
@@ -105,15 +105,15 @@ class SlowFast(nn.Module):
         
     def init_hidden(self,batch_size,device):
         hidden = (
-        torch.zeros(4,batch_size,32).requires_grad_().to(device),
-        torch.zeros(4,batch_size,32).requires_grad_().to(device),
+        torch.zeros(4,batch_size,64).requires_grad_().to(device),
+        torch.zeros(4,batch_size,64).requires_grad_().to(device),
         ) # num_layers, Batch, hidden size
         return hidden
     
 
     def forward(self, input):
         video = []
-        for i in range(0,input.shape[2],32):
+        for i in range(0,input.shape[2],64):
             fast, lateral = self.FastPath(input[:,:,i:i+64:2,:,:])
             slow = self.SlowPath(input[:,:,i:i+64:16,:,:],lateral)
             _video = torch.cat([slow,fast],dim=1)
@@ -122,7 +122,6 @@ class SlowFast(nn.Module):
         hidden = self.init_hidden(input.size(0), input.device)
         video,_ = self.lstm(video, hidden)
         video = video.view(video.size(1),-1)
-        
         features = self.dp(video)
         # method 1
         

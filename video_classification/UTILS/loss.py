@@ -50,7 +50,7 @@ class Custom_CrossEntropyLoss(LabelSmoothCrossEntropyLoss):
         return loss
 
 class Custom_MultiCrossEntropyLoss(LabelSmoothCrossEntropyLoss):
-    def __init__(self, num_classes = 4, label_num = 5, weight = None):
+    def __init__(self, num_classes = 4, label_num = 4, weight = None):
         super(Custom_MultiCrossEntropyLoss, self).__init__()
         self.num_classes = num_classes
         self.label_num = label_num

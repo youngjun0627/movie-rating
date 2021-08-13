@@ -11,10 +11,10 @@ def Collate_batch(batch):
         label_list.append(_label)
         genre_list.append(_genre)
         age_list.append(_age)
-        if len(_text)>60:
-            text_list.append(torch.tensor(_text[:60], dtype=torch.long))
+        if len(_text)>1500:
+            text_list.append(torch.tensor(_text[:1500], dtype=torch.long))
         else:
-            text_list.append(torch.tensor(np.concatenate([_text, np.zeros(60-len(_text), dtype=np.long)]) , dtype=torch.long))
+            text_list.append(torch.tensor(np.concatenate([_text, np.zeros(1500-len(_text), dtype=np.long)]) , dtype=torch.long))
     label_list = torch.tensor(label_list, dtype=torch.int64)
     genre_list = torch.tensor(genre_list, dtype=torch.int64)
     age_list = torch.tensor(age_list, dtype = torch.int64)

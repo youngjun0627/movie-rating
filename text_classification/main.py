@@ -6,11 +6,13 @@ import argparse
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from MODELS.only_text import Only_Text
+from MODELS.only_text2 import LSTM_with_Attention
 from UTILS.collate_batch import Collate_batch
 from DATASET.dataset import VideoDataset
 from UTILS.loss import Custom_CrossEntropyLoss, Custom_MSELoss, Custom_MultiCrossEntropyLoss, Custom_MultiBinaryCrossEntropyLoss, Custom_BCELoss
 from UTILS.custom_scheduler import CosineAnnealingWarmUpRestarts
 from tensorboardX import SummaryWriter
+from DATASET.TRANSFORMS.text_transform import EDA
 #from CONFIG.x3d_single import params
 #from CONFIG.x3d_multi import params
 #from CONFIG.x3d_multi_plot import params
@@ -30,6 +32,7 @@ from activate import train, val
 from torchtext.vocab import Vocab
 from collections import Counter
 from torchtext.data.utils import get_tokenizer
+from UTILS.text_function import text_func, get_tokenizer2
 
 print(os.getpid())
 def save_model(model, optimizer, scheduler, epoch, modelname):
@@ -58,7 +61,8 @@ def main():
     #convert_csv(params['dataset'])
     print('Loading dataset')
     train_transform = None
-    train_dataset = VideoDataset(params['dataset'],size=params['size'], mode='train', play_time=params['clip_len'],frame_sample_rate=params['frame_sample_rate'], transform=train_transform, sub_classnum = params['num_classes'], label_num = params['label_num'], stride_num = params['stride'], use_plot = params['use_plot'], use_audio = params['use_audio'], use_video = params['use_video'])
+    train_text_transform = EDA
+    train_dataset = VideoDataset(params['dataset'],size=params['size'], mode='train', play_time=params['clip_len'],frame_sample_rate=params['frame_sample_rate'], transform=train_transform, sub_classnum = params['num_classes'], label_num = params['label_num'], stride_num = params['stride'], use_plot = params['use_plot'], use_audio = params['use_audio'], use_video = params['use_video'], text_transform = train_text_transform)
     train_dataloader = DataLoader(
                         train_dataset,
                         batch_size=params['batch_size'],
@@ -67,7 +71,8 @@ def main():
                         collate_fn = Collate_batch)
 
     val_transform = None
-    val_dataset = VideoDataset(params['dataset'], size=params['size'],mode='validation', play_time=params['clip_len'],frame_sample_rate=params['frame_sample_rate'], transform = val_transform, sub_classnum = params['num_classes'], label_num=params['label_num'], stride_num = params['stride'], use_plot = params['use_plot'], use_video = params['use_video'], use_audio=params['use_audio'])
+    val_text_transform = None
+    val_dataset = VideoDataset(params['dataset'], size=params['size'],mode='validation', play_time=params['clip_len'],frame_sample_rate=params['frame_sample_rate'], transform = val_transform, sub_classnum = params['num_classes'], label_num=params['label_num'], stride_num = params['stride'], use_plot = params['use_plot'], use_video = params['use_video'], use_audio=params['use_audio'], text_transform = None)
     val_dataloader = DataLoader(
                         val_dataset,
                         batch_size=params['batch_size'],
@@ -82,11 +87,18 @@ def main():
     
     ### regression ###
     
-    #model = generate_model('XL', n_classes = params['label_num'])
-    model = Only_Text(class_num = params['num_classes'], label_num = params['label_num'])
+    #model = Only_Text(class_num = params['num_classes'], label_num = params['label_num'])
+    model = LSTM_with_Attention(class_num = params['num_classes'], label_num = params['label_num'])
     if params['use_plot']:
+        vocab, embedding_weight,vocab_size = text_func()
+        tokenizer = get_tokenizer2
+        train_dataset.generate_text_pipeline(vocab, tokenizer, vocab_size)
+        val_dataset.generate_text_pipeline(vocab, tokenizer, vocab_size)
+        model.init_text_weights(vocab_size = vocab_size, weights = embedding_weight)
+
+        '''
         plots = train_dataset.plots
-        plost = set(plots)
+        plots = set(plots)
         counter = Counter()
         tokenizer = get_tokenizer('basic_english')
         for plot in plots:
@@ -96,7 +108,7 @@ def main():
 
         val_dataset.generate_text_pipeline(vocab, tokenizer)
         model.init_text_weights(len(vocab))
-
+        '''
         
     if params['pretrained'] != '':
         pretrained_dict = torch.load(params['pretrained'], map_location='cpu')
@@ -148,14 +160,14 @@ def main():
     #optimizer = AdamP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], betas = (0.9, 0.999))
     #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 2, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
-    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=50, eta_max=0.000075, T_up=10, gamma=0.5)
+    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=50, eta_max=params['learning_rate']*7.5, T_up=10, gamma=0.5)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)
     print("train gogosing")
     pre_metric = 0
     for epoch in range(params['epoch_num']):
-        train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, optimizer, writer, device, mode = params['mode'], label_num=params['label_num'], display = params['display'])
+        train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, optimizer, writer, device, mode = params['mode'], label_num=params['label_num'])
         if (epoch+1) % 5==0:
             print('======================================================')
             print('validation gogosing')

@@ -21,16 +21,29 @@
 *.tar
 *.zip
 *.pth
-   
+*.pt
+
 # Logs and databases #
 ######################
 *.log
 *.sql
 *.sqlite
-   
+*.txt
+*.npy
+*.pyc
+*.swp
+*.pickle
+*.txt.pt
+
 # OS generated files #
 ######################
 .DS_Store*
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# floder #
+######################
+text_classification/DATASET/.vector_cache/*.txt
+text_classification/DATASET/.vector_cache/*.txt.pt
+**/log/*

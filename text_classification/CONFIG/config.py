@@ -1,22 +1,21 @@
 
 params = dict()
 params['num_classes']=4
-params['dataset'] = '/home/uchanlee/uchanlee/uchan/final_project3/UTILS'
+params['dataset'] = '/home/uchanlee/uchanlee/uchan/text_classification/UTILS'
 params['use_plot'] = True
 params['use_audio'] = False
 params['use_video'] = False
 params['epoch_num']=300
 params['label_num'] = 4
 params['mode']='multi'
-params['batch_size']=4
+params['batch_size']=32
 params['step']=50
 params['model'] = 'slowfast_multitask'
 params['size']=112
 params['num_workers']=1
 params['momentum']=0.9
-params['learning_rate']=0.000025
+params['learning_rate']=0.001
 params['weight_decay']=1e-5
-params['display']=370
 params['clip_len']=1024
 params['stride'] = 1
 params['pretrained']=''#'saved_model/saved_model_50.pth'

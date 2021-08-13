@@ -31,6 +31,7 @@ from activate import train, val
 from torchtext.vocab import Vocab
 from collections import Counter
 from torchtext.data.utils import get_tokenizer
+from MODELS.slowfast_ft import get_slowfast
 
 print(os.getpid())
 def save_model(model, optimizer, scheduler, epoch, modelname):
@@ -84,20 +85,8 @@ def main():
     ### regression ###
     
     #model = generate_model('XL', n_classes = params['label_num'])
-    model = SlowFast(class_num = params['num_classes'], label_num = params['label_num'])
-    if params['use_plot']:
-        plots = train_dataset.plots
-        plost = set(plots)
-        counter = Counter()
-        tokenizer = get_tokenizer('basic_english')
-        for plot in plots:
-            counter.update(tokenizer(plot))
-        vocab = Vocab(counter, min_freq = 1)
-        train_dataset.generate_text_pipeline(vocab, tokenizer)
-
-        val_dataset.generate_text_pipeline(vocab, tokenizer)
-        model.init_text_weights(len(vocab))
-
+    #model = SlowFast(class_num = params['num_classes'], label_num = params['label_num'])
+    model = get_slowfast(device)
         
     if params['pretrained'] != '':
         pretrained_dict = torch.load(params['pretrained'], map_location='cpu')
@@ -142,14 +131,14 @@ def main():
     #scheduler = optim.lr_scheduler.StepLR(optimizer,  step_size = params['step'], gamma=0.1)
 
     #optimizer = optim.SGD(model.parameters(),lr = params['learning_rate'],weight_decay=params['weight_decay'])
-    optimizer = optim.AdamW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
+    optimizer = optim.SGD(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
 
     #optimizer = optim.SGDW(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'])
     #optimizer = SGDP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], momentum=params['momentum'], nesterov=True)
     #optimizer = AdamP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], betas = (0.9, 0.999))
     #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 2, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
-    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=50, eta_max=0.000075, T_up=10, gamma=0.5)
+    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=50, eta_max=0.00075, T_up=10, gamma=0.5)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)

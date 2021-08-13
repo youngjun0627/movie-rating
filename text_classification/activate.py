@@ -26,7 +26,7 @@ class AverageMeter(object):
         self.count+=n
         self.avg = self.sum/self.count
 
-def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, optimizer, writer, device, mode = 'single', label_num=1, display=1):
+def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, optimizer, writer, device, mode = 'single', label_num=1):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -48,7 +48,6 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
     age_targets = []
     for step, (text, labels, age, genre) in enumerate(train_dataloader):
         data_time.update(time.time()-end)
-        
         text = text.to(device)
         labels = labels.long().to(device)
         genre_labels = genre.to(device)
@@ -59,9 +58,10 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
         loss1 = criterion1(outputs, labels)
         loss2 = criterion2(genre, genre_labels)
         loss3 = criterion3(age, age_labels)
-        loss = (1.6*loss1)+(0.8*loss2)+(0.5*loss3)
+        #loss = (1.6*loss1)+(0.8*loss2)+(0.5*loss3)
+        loss = loss1+loss2+loss3
         optimizer.zero_grad()
-        loss.backward()
+        loss.backward(retain_graph=True)
         optimizer.step()
         #losses.update(loss.item(),inputs.size(0))
         running_loss+=loss.item()
@@ -73,22 +73,17 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
             elif mode=='multi':
                 labels=torch.transpose(labels, 0, 1) # B, L -> L, B
                 for idx, (output, label) in enumerate(zip(outputs, labels)):
-                    output = np.argmax(F.softmax(output, dim=1).cpu().detach().numpy(), axis=1)
+                    preds[idx] += torch.argmax(output, dim=1).tolist()
                     #output = torch.sigmoid(output).cpu().detach().numpy()
-                    label = label.cpu().detach().numpy()
-                    for pred, target in zip(output, label):
-                        preds[idx].append(pred)
-                        targets[idx].append(target)
-                age_list = np.argmax(F.softmax(age, dim=1).cpu().detach().numpy(),axis=1)
-                age_label_list = age_labels.cpu().detach().numpy()
-                for pred, target in zip(age_list, age_label_list):
-                    age_preds.append(pred)
-                    age_targets.append(target)
+                    targets[idx] += label.tolist()
+                age_preds += torch.argmax(age, dim=1).tolist()
+                age_targets += age_labels.tolist()
+                
             else:
                 raise Exception('{} is not supported mode'.format(mode))
         batch_time.update(time.time()-end)
         end = time.time()
-        if (step+1)% display==0:
+        if (step+1)==len(train_dataloader):
             print('----------------------------------------------')
             for param in optimizer.param_groups:
                 print('lr : {}'.format(param['lr']))
@@ -97,12 +92,12 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
             print_string = 'data_time: {data_time:.3f}, batch_time: {batch_time:.3f}'.format(data_time = data_time.val, batch_time = batch_time.val)
             print(print_string)
             if mode=='single':
-                print_string = 'Loss : {loss:.5f} \t F1_score : {metric:.5f}'.format(loss=running_loss/display, metric = f1_score(np.array(targets), np.array(preds), average='macro'))
+                print_string = 'Loss : {loss:.5f} \t F1_score : {metric:.5f}'.format(loss=running_loss/len(train_dataloader), metric = f1_score(np.array(targets), np.array(preds), average='macro'))
                 print(print_string)
                 targets.clear()
                 preds.clear()
             elif mode=='multi':
-                print_string = 'Loss : {loss:.5f}'.format(loss=running_loss/display)
+                print_string = 'Loss : {loss:.5f}'.format(loss=running_loss/len(train_dataloader))
                 print(print_string)
                 for idx, (pred, target) in enumerate(zip(preds, targets)):
 
@@ -168,7 +163,8 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             loss1 = criterion1(outputs, labels)
             loss2 = criterion2(genre, genre_labels)
             loss3 = criterion3(age, age_labels)
-            loss = (1.6*loss1)+(0.8*loss2)+(0.5*loss3)
+            #loss = (1.6*loss1)+(0.8*loss2)+(0.5*loss3)
+            loss = loss1+loss2+loss3
             #print(loss.item())
             running_loss+=loss.item()
             #print(outputs.shape, labels.shape)
@@ -180,17 +176,11 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
             elif mode=='multi':
                 labels=torch.transpose(labels, 0, 1) # B, L -> L, B
                 for idx, (output, label) in enumerate(zip(outputs, labels)):
-                    output = np.argmax(F.softmax(output, dim=1).cpu().detach().numpy(), axis=1)
+                    preds[idx] += torch.argmax(output, dim=1).tolist()
                     #output = torch.sigmoid(output).cpu().detach().numpy()
-                    label = label.cpu().detach().numpy()
-                    for pred, target in zip(output, label):
-                        preds[idx].append(pred)
-                        targets[idx].append(target)
-                age_list = np.argmax(F.softmax(age, dim=1).cpu().detach().numpy(),axis=1)
-                age_label_list = age_labels.cpu().detach().numpy()
-                for pred, target in zip(age_list, age_label_list):
-                    age_preds.append(pred)
-                    age_targets.append(target)
+                    targets[idx] += label.tolist()
+                age_preds += torch.argmax(age, dim=1).tolist()
+                age_targets += age_labels.tolist()
             batch_time.update(time.time()-end)
 
             end = time.time()

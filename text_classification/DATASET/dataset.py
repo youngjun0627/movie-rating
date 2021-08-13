@@ -1,3 +1,5 @@
+import re
+from tqdm import tqdm
 import os
 import cv2
 import numpy as np
@@ -6,18 +8,19 @@ from PIL import Image
 import csv
 import albumentations
 from .TRANSFORMS.transform import create_train_transform, create_val_transform
+from .TRANSFORMS.text_transform import EDA
 from albumentations.pytorch.functional import img_to_tensor
 from sklearn import preprocessing
 import torch
 import random
 import sklearn
 import librosa
-from torchtext.vocab import Vocab
+from torchtext.vocab import Vocab, GloVe
 from collections import Counter
 from torchtext.data.utils import get_tokenizer
 
 class VideoDataset(Dataset):
-    def __init__(self, directory,size=224, mode = 'train', frame_sample_rate=1, cut_time=1, play_time=1024,transform=None,sub_classnum=4, label_num = 1, stride_num=8, use_plot=True, use_audio=True, use_video = True):
+    def __init__(self, directory,size=224, mode = 'train', frame_sample_rate=1, cut_time=1, play_time=1024,transform=None,sub_classnum=4, label_num = 1, stride_num=8, use_plot=True, use_audio=True, use_video = True, text_transform = None):
         folder = directory
         self.size = size
         self.frame_sample_rate = frame_sample_rate
@@ -27,6 +30,7 @@ class VideoDataset(Dataset):
         #self.frame_indices = range(start_time, start_time+play_time)
         self.cut_time = cut_time
         self.transform = transform
+        self.text_transform = text_transform
         self.filenames = []
         self.labels = []
         self.frame_lengths = []
@@ -133,6 +137,8 @@ class VideoDataset(Dataset):
 
         if self.use_plot:# add audio 
             plot = self.plots[index]
+            if self.text_transform:
+                plot = self.text_transform(plot)
             plot = np.array(self.text_pipeline(plot), dtype = np.long)
 
         if self.use_audio:
@@ -181,9 +187,9 @@ class VideoDataset(Dataset):
             dic = {0:0,1:0,2:1,3:1}
         return dic[int(label)]
 
-    def generate_text_pipeline(self, vocab, tokenizer):
+    def generate_text_pipeline(self, vocab, tokenizer, nb_words):
         self.vocab = vocab
-        self.text_pipeline = lambda x : [vocab[token] for token in tokenizer(x)]
+        self.text_pipeline = lambda x : [vocab[token] if (token in vocab and vocab[token]<nb_words) else 0 for token in tokenizer(x)]
 
     def get_class_weight(self):
         if self.label_num==1:
@@ -277,194 +283,18 @@ class VideoDataset(Dataset):
     def to_tensor(self, _input):
         return _input.transpose((3,0,1,2))
 
+def get_coefs(word, *arr):
+    return word, np.asarray(arr, dtype='float32')
+
 
 if __name__=='__main__':
-    
-
-    
+    #glove = load_glove()    
+    EMBEDDING_FILE = '../MODELS/glove.6B.100d.txt'
     transform = create_train_transform(True,True,True,True,size=112)
-    path = '/home/uchanlee/uchanlee/uchan/final_project3/UTILS'
-    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=False, mode='train')
-    
-    plots = a.plots
-    counter = Counter()
-    tokenizer = get_tokenizer('basic_english')
-    for plot in plots:
-        counter.update(tokenizer(plot))
-    vocab = Vocab(counter,min_freq=1)
-    a.generate_text_pipeline(vocab,tokenizer)
-    print(a.get_class_weight2())
+    path = '/home/uchanlee/uchanlee/uchan/text_classification/UTILS'
+    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=True, use_audio=False, use_video = False, mode='train', text_transform = EDA)
+    cnt=0
     print(a.get_age_weight2())
-    print(a.get_genre_weight2())
-    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=False, mode='validation')
-    
-    plots = a.plots
-    counter = Counter()
-    tokenizer = get_tokenizer('basic_english')
-    for plot in plots:
-        counter.update(tokenizer(plot))
-    vocab = Vocab(counter,min_freq=1)
-    a.generate_text_pipeline(vocab,tokenizer)
-    print(a.get_class_weight2())
-    print(a.get_age_weight2())
-    print(a.get_genre_weight2())
-    '''
-    r_mean = 0
-    r_std = 0
-    g_mean = 0
-    g_std = 0
-    b_mean = 0
-    b_std = 0
-    dataloader = DataLoader(a, batch_size=1)
-    for video, _ in dataloader:
-        r_mean += (video[:,0,:,:,:]/255.).mean()
-        r_std += (video[:,0,:,:,:]/255.).std()
-        g_mean += (video[:,1,:,:,:]/255.).mean()
-        g_std += (video[:,1,:,:,:]/255.).std()
-        b_mean += (video[:,2,:,:,:]/255.).mean()
-        b_std += (video[:,2,:,:,:]/255.).std()
-    print(r_mean/len(dataloader), g_mean/len(dataloader), b_mean/len(dataloader))
-    print(r_std/len(dataloader), g_std/len(dataloader), b_std/len(dataloader))
-    '''
-        
-    #print(a.get_class_weight())
-    #print(a.get_age_weight2())
-    #print(a.get_age_weight())
-    #for i in range(len(a.filenames)):
-    #    print(i)
-    '''
-    transform = create_val_transform(True, size=112)
-    a = VideoDataset(path, transform = transform, size=112,label_num=1, use_plot=True, mode = 'validation')
-    
-    plots = a.plots
-    counter = Counter()
-    tokenizer = get_tokenizer('basic_english')
-    for plot in plots:
-        counter.update(tokenizer(plot))
-    vocab = Vocab(counter,min_freq=1)
-    a.generate_text_pipeline(vocab,tokenizer)
-    print(a.get_class_weight2())
-    print(a.get_age_weight2())
-    '''
-    #print(a[0][0].shape)
-    #for i in range(len(a.filenames)):
-    #    print(i)
-    '''
-    r_mean=0
-    r_std=0
-    b_mean=0
-    b_std=0
-    g_mean=0
-    g_std=0
-    for b in a:
-        data = b[0]
-        r_mean += (data[0,:,:,:]/255.0).mean()
-        r_std += (data[0,:,:,:]/255.0).std()
-        g_mean += (data[1,:,:,:]/255.0).mean()
-        g_std += (data[1,:,:,:]/255.0).std()
-        b_mean += (data[2,:,:,:]/255.0).mean()
-        b_std += (data[2,:,:,:]/255.0).std()
-    
-    print(r_mean/len(a), r_std/len(a))
-    print(g_mean/len(a), g_std/len(a))
-    print(b_mean/len(a), b_std/len(a))
-
-
-
-    a = VideoDataset(path, transform = transform, size=224,label_num=5, use_plot=True, mode='validation')
-    
-    plots = a.plots
-    counter = Counter()
-    tokenizer = get_tokenizer('basic_english')
-    for plot in plots:
-        counter.update(tokenizer(plot))
-    vocab = Vocab(counter,min_freq=1)
-    a.generate_text_pipeline(vocab,tokenizer)
-    print(a.get_class_weight())
-    print(a.get_class_weight2())
-    print(a.get_age_weight())
-    r_mean=0
-    r_std=0
-    b_mean=0
-    b_std=0
-    g_mean=0
-    g_std=0
-    for b in a:
-        data = b[0]
-        r_mean += (data[0,:,:,:]/255.0).mean()
-        r_std += (data[0,:,:,:]/255.0).std()
-        g_mean += (data[1,:,:,:]/255.0).mean()
-        g_std += (data[1,:,:,:]/255.0).std()
-        b_mean += (data[2,:,:,:]/255.0).mean()
-        b_std += (data[2,:,:,:]/255.0).std()
-    
-    print(r_mean/len(a), r_std/len(a))
-    print(g_mean/len(a), g_std/len(a))
-    print(b_mean/len(a), b_std/len(a))
-    '''
-    '''
-    print(a[100][0].shape)
-    b = torch.tensor(a[0][0])
-    images = b.permute(1,2,3,0).numpy()
-    for idx,img in enumerate(images):
-        if idx ==1:
-            print(img)
-        cv2.imwrite('./TEMP/image_{}.jpg'.format(idx), img.astype('uint8'))
-    '''
-    '''
-    video, plot, label, sub_labels, sub_labels2, mfccs = a[0]
-    print(mfccs.shape)
-    '''
-    #print(a.get_class_weight())
-    #print(len((a.sub_labels)))
-    #print(a[0])
-    #transform = create_val_transform(True, size=112)
-    #a = VideoDataset(path,size=112, transform = transform, mode = 'validation', label_num=4)
-    #print(a.get_class_weight())
-    
-    #print((a[0][0]>0).sum())
-    #print((a[0][0]<0).sum())
-    
-    #r_mean = 0
-    #r_std = 0
-    #g_mean=0
-    #g_std=0
-    #b_mean=0
-    #b_std=0
-    
-    #path = '/home/guest0/uchan/slowfast/UTILS'
-    #transform = create_train_transform(True,True,True,True,size=112)
-    #a = VideoDataset(path, transform = transform, size=112,label_num=4)
-    #print(len(a))
-    #print(a.get_class_weight())
-    #transform = create_val_transform(True,size=112)
-    #a = VideoDataset(path, transform = transform, size=112,label_num=4, mode = 'validation')
-    #print(len(a))
-    #print(a.get_class_weight())
-    
-    
-    #path = '/home/guest0/uchan/slowfast/UTILS'
-    #transform = create_train_transform(False,False,False,True,size=112)
-    #a = VideoDataset(path, transform = transform, size=112,label_num=4)
-    #transform = create_train_transform(True,size=112)
-    #transform = create_train_transform(True,True,True,True,size=112)
-    #a = VideoDataset(path, transform = transform, size=112,label_num=4)
-    #r_mean=0
-    #r_std=0
-    #b_mean=0
-    #b_std=0
-    #g_mean=0
-    #g_std=0
-    #for b in a:
-    #    data = b[0]
-    #    r_mean += (data[0,:,:,:]/255.0).mean()
-    #    r_std += (data[0,:,:,:]/255.0).std()
-    #    g_mean += (data[1,:,:,:]/255.0).mean()
-    #    g_std += (data[1,:,:,:]/255.0).std()
-    #    b_mean += (data[2,:,:,:]/255.0).mean()
-    #    b_std += (data[2,:,:,:]/255.0).std()
-    #print(a[0][0])
-    #print(r_mean/len(a), r_std/len(a))
-    #print(g_mean/len(a), g_std/len(a))
-    #print(b_mean/len(a), b_std/len(a))
-    
+    for z in a.plots:
+        cnt+=len(z.split())
+    print(cnt/len(a))
