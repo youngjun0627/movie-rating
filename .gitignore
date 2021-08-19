@@ -22,6 +22,8 @@
 *.zip
 *.pth
 *.pt
+*.pyth
+*.pkl
 
 # Logs and databases #
 ######################

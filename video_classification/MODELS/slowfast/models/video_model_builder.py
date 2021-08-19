@@ -731,7 +731,7 @@ class X3D(nn.Module):
             dim_in=cfg.DATA.INPUT_CHANNEL_NUM,
             dim_out=[dim_res1],
             kernel=[temp_kernel[0][0] + [3, 3]],
-            stride=[[1, 2, 2]],
+            stride=[[1, 1, 1]],
             padding=[[temp_kernel[0][0][0] // 2, 1, 1]],
             norm_module=self.norm_module,
             stem_func_name="x3d_stem",
@@ -778,21 +778,49 @@ class X3D(nn.Module):
             NotImplementedError
         else:
             spat_sz = int(math.ceil(cfg.DATA.TRAIN_CROP_SIZE / 32.0))
-            self.head = head_helper.X3DHead(
+            self.head = head_helper.CUSTOM_X3DHead(
                 dim_in=dim_out,
                 dim_inner=dim_inner,
                 dim_out=cfg.X3D.DIM_C5,
-                num_classes=cfg.MODEL.NUM_CLASSES,
                 pool_size=[cfg.DATA.NUM_FRAMES, spat_sz, spat_sz],
                 dropout_rate=cfg.MODEL.DROPOUT_RATE,
-                act_func=cfg.MODEL.HEAD_ACT,
                 bn_lin5_on=cfg.X3D.BN_LIN5,
             )
 
-    def forward(self, x, bboxes=None):
-        for module in self.children():
+        self.lstm = nn.LSTM(2048, hidden_size=64, num_layers=2, batch_first=False, bidirectional = True, dropout = 0.3)
+        self.dp = nn.Dropout(0.5)
+        self.content_fc = nn.ModuleList([nn.Linear(2048, 4, bias=True) for _ in range(4)])
+        self.genre_fc = nn.Linear(2048,9, bias = True)
+        self.age_fc = nn.Linear(2048,4,bias=True)
+
+    def init_hidden(self, batch_size,device):
+        hidden = (
+                torch.zeros(4,batch_size,64).requires_grad_().to(device),
+                torch.zeros(4,batch_size,64).requires_grad_().to(device),
+                )
+        return hidden
+
+    def extract(self, x):
+        for module in list(self.children())[:-5]:
             x = module(x)
         return x
+    
+    def forward(self, inputs, bboxes=None):
+        video = []
+        for i in range(0, inputs.size(2), 64):
+            x = [inputs[:,:,i:i+64:4,:,:]]
+            video.append(self.extract(x))
+        video = torch.stack(video)
+        hidden = self.init_hidden(inputs.size(0), inputs.device)
+        features, _ = self.lstm(video, hidden)
+        features = features.view(video.size(1),-1)
+        content = []
+        for i, fc in enumerate(self.content_fc):
+            content.append(fc(self.dp(features)))
+        content = torch.stack(content)
+        genre = self.genre_fc(features)
+        age = self.age_fc(features)
+        return content, genre, age
 
 
 @MODEL_REGISTRY.register()

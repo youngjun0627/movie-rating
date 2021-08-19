@@ -32,6 +32,7 @@ from torchtext.vocab import Vocab
 from collections import Counter
 from torchtext.data.utils import get_tokenizer
 from MODELS.slowfast_ft import get_slowfast
+from MODELS.x3d_ft import get_x3d
 
 print(os.getpid())
 def save_model(model, optimizer, scheduler, epoch, modelname):
@@ -86,8 +87,10 @@ def main():
     
     #model = generate_model('XL', n_classes = params['label_num'])
     #model = SlowFast(class_num = params['num_classes'], label_num = params['label_num'])
-    model = get_slowfast(device)
-        
+
+
+    #model = get_slowfast(device)
+    model = get_x3d(device)   
     if params['pretrained'] != '':
         pretrained_dict = torch.load(params['pretrained'], map_location='cpu')
         try:
@@ -138,7 +141,7 @@ def main():
     #optimizer = AdamP(model.parameters(), lr = params['learning_rate'], weight_decay = params['weight_decay'], betas = (0.9, 0.999))
     #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience = 2, factor = 0.5, verbose=False)
     #scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 30, eta_min = 0)
-    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=50, eta_max=0.00075, T_up=10, gamma=0.5)
+    scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=50, eta_max=params['learning_rate']*7.5, T_up=10, gamma=0.5)
     model_save_dir = os.path.join(params['save_path'], 'second')
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)
