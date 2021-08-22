@@ -21,17 +21,17 @@ class Only_Audio(nn.Module):
                                         nn.BatchNorm2d(32),\
                                         nn.LeakyReLU(inplace = True),\
                                         nn.MaxPool2d(2),\
-                                        nn.Dropout(0.2),
+                                        nn.Dropout(0.3),
                                         nn.Conv2d(32, 64, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
                                         nn.BatchNorm2d(64),\
                                         nn.LeakyReLU(inplace = True),\
                                         nn.MaxPool2d(2),\
-                                        nn.Dropout(0.2),\
+                                        nn.Dropout(0.3),\
                                         nn.Conv2d(64, 128, kernel_size=(3,15), stride=(1,3), padding=(1,1)),\
                                         nn.BatchNorm2d(128),\
                                         nn.LeakyReLU(inplace = True),\
                                         nn.MaxPool2d(2),\
-                                        nn.Dropout(0.2),
+                                        nn.Dropout(0.3),
                                         nn.Conv2d(128, 256, kernel_size=(3,11), stride=(1,3), padding=(1,1)),\
                                         nn.AdaptiveAvgPool2d(2)\
                                         )
@@ -55,14 +55,14 @@ class Only_Audio(nn.Module):
 
     def forward(self, audio):
         audio = self.extract_audio(audio)
-        features = self.dp(audio.view(audio.shape[0], -1))
+        features = audio.view(audio.shape[0], -1)
         
         outputs = []
         for fc in self.classifier1:
-            outputs.append(fc(features))
+            outputs.append(fc(self.dp(features)))
         outputs = torch.stack(outputs)
-        genre = self.genrefc(features)
-        age = self.agefc(features)
+        genre = self.genrefc(self.dp(features))
+        age = self.agefc(self.dp(features))
         return outputs, genre, age
 
 if __name__=='__main__':
