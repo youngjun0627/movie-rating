@@ -1,12 +1,5 @@
-Traceback (most recent call last):
-  File "main.py", line 30, in <module>
-    from activate import train, val
-  File "/home/uchanlee/uchanlee/uchan/video_classification/activate.py", line 62
-    loss = loss1+loss2)+loss3
-                      ^
-SyntaxError: invalid syntax
 Please update your PyTorchVideo to latest master
-30717
+14138
 1.7.1
 Loading dataset
 {0: {1: 684, 0: 332, 2: 343, 3: 127}, 1: {0: 142, 2: 534, 3: 424, 1: 386}, 2: {0: 135, 1: 569, 2: 486, 3: 296}, 3: {0: 195, 2: 588, 1: 386, 3: 317}}
@@ -17,9 +10,19 @@ validation_dataset : batch_size -> 4, step_size -> 186, frames -> 1024
 Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
 !! pred_b: can not be converted, got head.projection.bias
 !! pred_w: can not be converted, got head.projection.weight
-Not loaded {'lstm.weight_hh_l0', 'lstm.weight_hh_l1_reverse', 'content_fc.0.bias', 'content_fc.1.bias', 'lstm.weight_ih_l1', 'content_fc.3.weight', 'lstm.weight_ih_l1_reverse', 'lstm.bias_hh_l0', 'content_fc.1.weight', 'lstm.bias_hh_l1_reverse', 'lstm.weight_hh_l1', 'lstm.bias_ih_l0', 'lstm.bias_ih_l1', 'lstm.weight_ih_l0_reverse', 'age_fc.bias', 'age_fc.weight', 'genre_fc.weight', 'content_fc.2.weight', 'lstm.weight_ih_l0', 'lstm.bias_hh_l0_reverse', 'content_fc.2.bias', 'lstm.bias_hh_l1', 'lstm.weight_hh_l0_reverse', 'content_fc.3.bias', 'content_fc.0.weight', 'lstm.bias_ih_l0_reverse', 'genre_fc.bias', 'lstm.bias_ih_l1_reverse'}
+Not loaded {'content_fc.1.bias', 'lstm.bias_ih_l0', 'lstm.weight_ih_l1_reverse', 'content_fc.3.weight', 'lstm.bias_ih_l1_reverse', 'lstm.weight_ih_l1', 'lstm.weight_ih_l0', 'content_fc.2.weight', 'lstm.weight_hh_l1_reverse', 'lstm.weight_hh_l0_reverse', 'content_fc.3.bias', 'lstm.bias_ih_l1', 'lstm.bias_hh_l1_reverse', 'lstm.bias_hh_l0', 'age_fc.weight', 'age_fc.bias', 'lstm.bias_ih_l0_reverse', 'content_fc.0.bias', 'content_fc.2.bias', 'lstm.weight_hh_l1', 'lstm.weight_ih_l0_reverse', 'genre_fc.weight', 'lstm.weight_hh_l0', 'lstm.bias_hh_l1', 'genre_fc.bias', 'content_fc.0.weight', 'content_fc.1.weight', 'lstm.bias_hh_l0_reverse'}
 tensor([1.1190, 0.5431, 1.0831, 2.9252], device='cuda:1')
 tensor([2.6162, 0.9624, 0.6957, 0.8762], device='cuda:1')
 tensor([2.7519, 0.6529, 0.7644, 1.2551], device='cuda:1')
 tensor([1.9051, 0.9624, 0.6318, 1.1719], device='cuda:1')
 train gogosing
+----------------------------------------------
+lr : 0.005
+Epoch:[1] step : [370/372]
+data_time: 15.928, batch_time: 18.839
+Loss : 3.43176
+Label sex_nudity -> precision_score : 0.27341 recall_score : 0.26087 f1_score : 0.26699
+Label violence_gore -> precision_score : 0.26024 recall_score : 0.25827 f1_score : 0.25925
+Label profinancy -> precision_score : 0.24389 recall_score : 0.24708 f1_score : 0.24548
+Label frightening_intense_scene -> precision_score : 0.25975 recall_score : 0.25259 f1_score : 0.25612
+Label Age -> precision_score : 0.16605 recall_score : 0.22271 f1_score : 0.19025
