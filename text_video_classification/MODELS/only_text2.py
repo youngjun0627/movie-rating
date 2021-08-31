@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from DATASET.dataset import VideoDataset
-from CONFIG.config import params
 '''
 ref : https://github.com/slaysd/pytorch-sentiment-analysis-classification/blob/master/model.py
 '''
@@ -20,7 +18,8 @@ class LSTM_with_Attention(nn.Module):
                 use_dropout = True):
         super(LSTM_with_Attention, self).__init__()
         self.embedding_dim = embedding_dim
-        self.embedding = None
+        #self.embedding = None
+        self.embedding = nn.Embedding(1500,300,padding_idx=0)
         self.rnn = nn.GRU(embedding_dim, hidden_dim, 
                         batch_first = True,
                         bidirectional = use_bidirectional,
@@ -43,8 +42,11 @@ class LSTM_with_Attention(nn.Module):
 
 
     def attention(self, lstm_output, final_state):
-        lstm_output = lstm_output.squeeze(0)
-        hidden = final_state.squeeze(0)
+        #print(lstm_output.shape)
+        #lstm_output = lstm_output.squeeze(0)
+        #print(lstm_output.shape)
+        #hidden = final_state.squeeze(0)
+        hidden = final_state
         attn_weights = torch.bmm(lstm_output, hidden.unsqueeze(2)).squeeze(2)
         soft_attn_weights = F.softmax(attn_weights, 1)
         return torch.bmm(lstm_output.transpose(1,2), soft_attn_weights.unsqueeze(2)).squeeze(2)
