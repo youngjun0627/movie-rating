@@ -36,6 +36,7 @@ class Only_Audio(nn.Module):
                                         nn.Conv2d(128, 256, kernel_size=(3,11), stride=(1,3), padding=(1,1)),\
                                         nn.AdaptiveAvgPool2d(2)\
                                         )
+        self.fc = nn.Linear(self.audio_size, self.audio_size)
         self.audio_init_weights()
         
     
@@ -57,7 +58,8 @@ class Only_Audio(nn.Module):
     def forward(self, audio):
         audio = self.extract_audio(audio)
         features = audio.view(audio.shape[0], -1)
-        features = self.dp(features)            
+        features = self.dp(features)
+        features = self.fc(features)
         return features
         '''
         outputs = []
