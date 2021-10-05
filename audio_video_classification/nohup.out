@@ -1,5 +1,5 @@
 Please update your PyTorchVideo to latest master
-59452
+100077
 1.7.1
 Loading dataset
 {0: {1: 398, 0: 235, 2: 224, 3: 82}, 1: {2: 334, 1: 256, 3: 273, 0: 76}, 2: {1: 330, 0: 84, 2: 310, 3: 215}, 3: {2: 367, 1: 233, 0: 131, 3: 208}}
@@ -8,3 +8,11 @@ train_dataset : batch_size -> 2, step_size -> 470, frames -> 1024
 validation_dataset : batch_size -> 2, step_size -> 235, frames -> 1024
 =========================================================================================================
 Load model : mode -> multi, label_size -> 4, sub_class_num -> 4
+!! pred_b: can not be converted, got head.projection.bias
+!! pred_w: can not be converted, got head.projection.weight
+Not loaded {'lstm.bias_hh_l1_reverse', 'content_fc.3.weight', 'lstm.bias_ih_l1', 'lstm.bias_hh_l0', 'lstm.weight_hh_l0', 'genre_fc.weight', 'lstm.bias_ih_l0', 'lstm.weight_ih_l0', 'lstm.weight_ih_l0_reverse', 'content_fc.3.bias', 'age_fc.bias', 'lstm.weight_hh_l1', 'lstm.weight_hh_l0_reverse', 'lstm.weight_ih_l1_reverse', 'content_fc.1.weight', 'content_fc.2.bias', 'lstm.bias_ih_l0_reverse', 'content_fc.1.bias', 'lstm.bias_hh_l0_reverse', 'lstm.weight_ih_l1', 'content_fc.2.weight', 'lstm.bias_ih_l1_reverse', 'genre_fc.bias', 'lstm.weight_hh_l1_reverse', 'age_fc.weight', 'content_fc.0.bias', 'content_fc.0.weight', 'lstm.bias_hh_l1'}
+tensor([0.9989, 0.5898, 1.0480, 2.8628], device='cuda:1')
+tensor([3.0888, 0.9170, 0.7028, 0.8599], device='cuda:1')
+tensor([2.7946, 0.7114, 0.7573, 1.0919], device='cuda:1')
+tensor([1.7920, 1.0075, 0.6396, 1.1286], device='cuda:1')
+train gogosing
