@@ -22,7 +22,7 @@ def get_slowfast(device):
     cfg.merge_from_file(cfg_file)
     slowfast_model = build_model(cfg, gpu_id=device)
     cfg.TRAIN.CHECKPOINT_TYPE = 'caffe2'
-    cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root,'saved_model/SLOWFAST_8x8_R50.pkl')
+    cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root,'saved_model/SLOWFAST_8x8_R50.pyth')
     #slowfast_model.load_state_dict(torch.load(cfg.TRAIN.CHECKPOINT_FILE_PATH), strict=False, encoding='latin1')
      
     cu.load_checkpoint(
@@ -31,7 +31,7 @@ def get_slowfast(device):
         False,
           None,
             inflation=False,
-              convert_from_caffe2=cfg.TRAIN.CHECKPOINT_TYPE == "caffe2",
+              #convert_from_caffe2=cfg.TRAIN.CHECKPOINT_TYPE == "caffe2",
               )
     
     '''
