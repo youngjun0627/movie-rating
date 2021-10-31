@@ -26,10 +26,11 @@ class LSTM_with_Attention(nn.Module):
                         bidirectional = use_bidirectional,
                         num_layers = n_layers,
                         dropout = 0.7 if use_dropout and n_layers>1 else 0.) 
-        input_dim = hidden_dim * 2 if use_bidirectional else hidden_dim
+        feature_dim = hidden_dim * 2 if use_bidirectional else hidden_dim
+        input_dim = 1024
         #self.bn = nn.BatchNorm1d(embedding_dim)
         self.relu = nn.ReLU()
-        self.fc = nn.Linear(input_dim, 1024)
+        self.fc = nn.Linear(feature_dim, input_dim)
         self.content_fcs = nn.ModuleList([nn.Linear(input_dim, class_num) for _ in range(label_num)])
         # genre fc, age fc #
         self.genrefc = nn.Linear(input_dim, 9)
