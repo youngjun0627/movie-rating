@@ -408,9 +408,11 @@ class SlowFast(nn.Module):
             '''
         self.lstm = nn.LSTM(2048+256, hidden_size = 64, num_layers = 2, batch_first=False, bidirectional=True, dropout=0.4)
         self.dp = nn.Dropout(0.5)
-        self.content_fc = nn.ModuleList([nn.Linear(2048, 4, bias=True) for _ in range(4)])
-        self.genre_fc = nn.Linear(2048, 9)
-        self.age_fc = nn.Linear(2048, 4) 
+        self.fc = nn.Linear(2048, 1024)
+        self.content_fc1 = nn.ModuleList([nn.Linear(1024, 256, bias=True) for _ in range(4)])
+        self.content_fc2 = nn.ModuleList([nn.Linear(256, 4, bias=True) for _ in range(4)])
+        self.genre_fc = nn.Linear(1024, 9)
+        self.age_fc = nn.Linear(1024, 4) 
 
     def init_hidden(self,batch_size,device):
         hidden = (
@@ -443,10 +445,11 @@ class SlowFast(nn.Module):
         video = torch.stack(video)
         hidden = self.init_hidden(x.size(0), x.device)
         features,_ = self.lstm(video, hidden)
-        features = features.view(video.size(1),-1)
+        features = self.dp(features.view(video.size(1),-1))
+        features = self.dp(F.relu(self.fc(features)))
         content = []
-        for i, fc in enumerate(self.content_fc):
-            content.append(fc(self.dp(features)))
+        for fc1, fc2 in zip(self.content_fc1, self.content_fc2):
+            content.append(fc2(self.dp(F.leaky_relu(fc1(features)))))
         content = torch.stack(content)
         genre = self.genre_fc(features)
         age = self.age_fc(features)

@@ -10,7 +10,8 @@ class Only_Audio(nn.Module):
         self.audio_size = 1000
         self.class_num = class_num
         self.label_num = label_num
-        self.feature_size = 12*256//2
+        feat_s = 12000 // self.audio_size
+        self.feature_size = int((feat_s*2-1) * 256 / 2)
         self.dp = nn.Dropout(dropout)
         self.fc = nn.Linear(self.feature_size, 1024)
         self.contentfc1 = nn.ModuleList([nn.Linear(1024, 256) for _ in range(label_num)])
@@ -67,9 +68,17 @@ class Only_Audio(nn.Module):
 
     def forward(self, audio):
         features = []
+        start = 0
+        while start + self.audio_size <= audio.size(3):
+            feature = self.extract_audio(audio[:, :, :, start:start+self.audio_size])
+            features.append(feature)
+            start += self.audio_size//2
+        '''
+        for start in range(self.audio_size//2)
         for i in range(audio.size(3)//self.audio_size):
             feature = self.extract_audio(audio[:, :, :, i:i+self.audio_size])
             features.append(feature)
+        '''
         features = torch.stack(features)
         features = features.view(features.size(0), features.size(1), -1)
         hidden = self.init_hidden(features.size(1), features.device)
@@ -84,3 +93,8 @@ class Only_Audio(nn.Module):
         age = self.agefc(features)
 
         return outputs, genre, age
+
+if __name__=="__main__":
+    model = Only_Audio().cuda()
+    data = torch.randn(4,1,40,12000).cuda()
+    model(data)
