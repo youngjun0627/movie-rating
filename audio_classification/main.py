@@ -5,7 +5,7 @@ import torch
 import argparse
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from MODELS.only_audio import Only_Audio
+from MODELS.only_audio2 import Only_Audio
 from UTILS.collate_batch import Collate_batch
 from DATASET.dataset import VideoDataset
 from UTILS.loss import Custom_CrossEntropyLoss, Custom_MSELoss, Custom_MultiCrossEntropyLoss, Custom_MultiBinaryCrossEntropyLoss, Custom_BCELoss

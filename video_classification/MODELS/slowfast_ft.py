@@ -17,12 +17,12 @@ def get_slowfast(device):
     np.random.seed(cfg.RNG_SEED)
     torch.manual_seed(cfg.RNG_SEED)
     # Load config from cfg.
-    root = '/home/uchanlee/uchanlee/uchan/video_classification/MODELS/slowfast'
+    root = '/home/uchanlee/uchanlee/movie-rating/video_classification/MODELS/slowfast'
     cfg_file = os.path.join(root,'config/slowfast_config.yaml')
     cfg.merge_from_file(cfg_file)
     slowfast_model = build_model(cfg, gpu_id=device)
     cfg.TRAIN.CHECKPOINT_TYPE = 'caffe2'
-    cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root,'saved_model/SLOWFAST_8x8_R50.pkl')
+    cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root,'saved_model/kinetics.pkl')
     #slowfast_model.load_state_dict(torch.load(cfg.TRAIN.CHECKPOINT_FILE_PATH), strict=False, encoding='latin1')
      
     cu.load_checkpoint(

@@ -8,11 +8,15 @@ class Only_Audio(nn.Module):
         super(Only_Audio, self).__init__()
         self.mode = mode
         self.audio_size = 1024
+        self.feature_size1 = 512
+        self.feature_size2 = 128
         self.class_num = class_num
         self.label_num = label_num
         
         self.dp = nn.Dropout(dropout)
-        self.classifier1 = nn.ModuleList([nn.Linear(self.audio_size, class_num) for _ in range(label_num)])
+        self.fc1 = nn.ModuleList([nn.Linear(self.audio_size, self.feature_size1) for _ in range(label_num)])
+        self.fc2 = nn.ModuleList([nn.Linear(self.feature_size1, self.feature_size2) for _ in range(label_num)])
+        self.classifier = nn.ModuleList([nn.Linear(self.feature_size2, class_num) for _ in range(label_num)])
         # genre fc, age fc #
         self.genrefc = nn.Linear(self.audio_size, 9)
         self.agefc = nn.Linear(self.audio_size, 4)
@@ -41,7 +45,7 @@ class Only_Audio(nn.Module):
     def audio_init_weights(self):
         for m in self.extract_audio:
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity='leaky_relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity='leaky_relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias,0)
 
@@ -58,8 +62,8 @@ class Only_Audio(nn.Module):
         features = audio.view(audio.shape[0], -1)
         
         outputs = []
-        for fc in self.classifier1:
-            outputs.append(fc(self.dp(features)))
+        for fc1, fc2, fc3 in zip(self.fc1, self.fc2, self.classifier):
+            outputs.append(fc3(self.dp(fc2(self.dp((F.relu(fc1(features))))))))
         outputs = torch.stack(outputs)
         genre = self.genrefc(self.dp(features))
         age = self.agefc(self.dp(features))

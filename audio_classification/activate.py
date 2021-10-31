@@ -98,7 +98,7 @@ def train(model, train_dataloader, epoch, criterion1, criterion2, criterion3, op
             print_string = 'data_time: {data_time:.3f}, batch_time: {batch_time:.3f}'.format(data_time = data_time.val, batch_time = batch_time.val)
             print(print_string)
             if mode=='single':
-                print_string = 'Loss : {loss:.5f} \t F1_score : {metric:.5f}'.format(loss=running_loss/display, metric = f1_score(np.array(targets), np.array(preds), average='macro'))
+                print_string = 'Loss : {loss:.5f} \t F1_score : {metric:.5f}'.format(loss=running_loss/display, metric = f1_score(np.array(targets), np.array(preds), average='weighted'))
                 print(print_string)
                 targets.clear()
                 preds.clear()
@@ -202,7 +202,7 @@ def val(model, val_dataloader, epoch, criterion1, criterion2, criterion3, optimi
 
         result = 0
         if mode=='single':
-            score = f1_score(np.array(targets), np.array(preds), average='macro')
+            score = f1_score(np.array(targets), np.array(preds), average='weighted')
             result = score
             print_string = 'Loss : {loss:.5f} \t F1_score : {metric:.5f}'.format(loss=running_loss/len(val_dataloader), metric = score)
             print(print_string)

@@ -6,7 +6,7 @@ import argparse
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from MODELS.only_text import Only_Text
-from MODELS.only_text2 import LSTM_with_Attention
+from MODELS.only_text3 import LSTM_with_Attention
 from UTILS.collate_batch import Collate_batch
 from DATASET.dataset import VideoDataset
 from UTILS.loss import Custom_CrossEntropyLoss, Custom_MSELoss, Custom_MultiCrossEntropyLoss, Custom_MultiBinaryCrossEntropyLoss, Custom_BCELoss

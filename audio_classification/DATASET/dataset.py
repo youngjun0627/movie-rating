@@ -136,11 +136,11 @@ class VideoDataset(Dataset):
             plot = np.array(self.text_pipeline(plot), dtype = np.long)
 
         if self.use_audio:
-            mfccs = np.load(self.audios[index]).astype('uint8')
-            mfccs = Image.fromarray(mfccs).resize((4400,40))
-            mfccs = np.array(mfccs).astype('float')
+            mfccs = np.load(self.audios[index]).astype('float32')
+            mfccs = Image.fromarray(mfccs).resize((12000,40))
+            mfccs = np.array(mfccs).astype('float') 
             if self.mode=='train':
-                mfccs += 0.005 * np.random.randn(40,4400)
+                mfccs += 0.0005 * np.random.randn(40,12000)
             mfccs = np.expand_dims(mfccs, axis=0)
 
         label = self.labels[index]
@@ -284,8 +284,18 @@ if __name__=='__main__':
     
     transform = create_train_transform(True,True,True,True,size=112)
     path = '/home/uchanlee/uchanlee/uchan/final_project3/UTILS'
-    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=False, mode='train')
+    a = VideoDataset(path, transform = None, size=224,label_num=5, sub_classnum=4, use_plot=False,use_video=False,mode='train')
+    sum_y = 0
+    sum_x = 0
+    for i in range(len(a)):
+        _,y,x = a[i][2].shape
+        sum_y+=y
+        sum_x+=x
+    print(sum_y/len(a))
+    print(sum_x/len(a))
+    print(a[0][2].shape)
     
+    '''
     plots = a.plots
     counter = Counter()
     tokenizer = get_tokenizer('basic_english')
@@ -308,6 +318,7 @@ if __name__=='__main__':
     print(a.get_class_weight2())
     print(a.get_age_weight2())
     print(a.get_genre_weight2())
+    '''
     '''
     r_mean = 0
     r_std = 0
