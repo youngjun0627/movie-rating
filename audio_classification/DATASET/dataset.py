@@ -139,8 +139,8 @@ class VideoDataset(Dataset):
             mfccs = np.load(self.audios[index]).astype('float32')
             mfccs = Image.fromarray(mfccs).resize((12000,40))
             mfccs = np.array(mfccs).astype('float') 
-            if self.mode=='train':
-                mfccs += 0.0005 * np.random.randn(40,12000)
+            #if self.mode=='train':
+            #    mfccs += 0.0005 * np.random.randn(40,12000)
             mfccs = np.expand_dims(mfccs, axis=0)
 
         label = self.labels[index]

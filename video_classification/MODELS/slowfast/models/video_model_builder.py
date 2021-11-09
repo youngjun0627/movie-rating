@@ -7,6 +7,7 @@ import math
 from functools import partial
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.nn.init import trunc_normal_
 
 from . import weight_init_helper as init_helper
@@ -414,6 +415,9 @@ class SlowFast(nn.Module):
         self.genre_fc = nn.Linear(1024, 9)
         self.age_fc = nn.Linear(1024, 4) 
 
+    def mish(self, x): 
+        return x * torch.tanh(F.softplus(x))
+
     def init_hidden(self,batch_size,device):
         hidden = (
                   torch.zeros(4,batch_size,64).requires_grad_().to(device),
@@ -445,8 +449,8 @@ class SlowFast(nn.Module):
         video = torch.stack(video)
         hidden = self.init_hidden(x.size(0), x.device)
         features,_ = self.lstm(video, hidden)
-        features = self.dp(features.view(video.size(1),-1))
-        features = self.dp(F.relu(self.fc(features)))
+        features = features.view(video.size(1),-1)
+        features = self.dp(self.mish(self.fc(features)))
         content = []
         for fc1, fc2 in zip(self.content_fc1, self.content_fc2):
             content.append(fc2(self.dp(F.leaky_relu(fc1(features)))))
