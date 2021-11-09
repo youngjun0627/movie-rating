@@ -812,6 +812,9 @@ class X3D(nn.Module):
             x = module(x)
         return x
     
+    def mish(self, x): 
+        return x * tf.nn.tanh(tf.nn.softplus(x))
+    
     def forward(self, inputs, bboxes=None):
         video = []
         for i in range(0, inputs.size(2), 64):
@@ -820,7 +823,9 @@ class X3D(nn.Module):
         video = torch.stack(video)
         hidden = self.init_hidden(inputs.size(0), inputs.device)
         features, _ = self.lstm(video, hidden)
+
         features = features.view(video.size(1),-1)
+        features =self.mish(features)
         content = []
         for i, fc in enumerate(self.content_fc):
             content.append(fc(self.dp(features)))
