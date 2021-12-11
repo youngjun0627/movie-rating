@@ -366,7 +366,6 @@ class ResNetBasicHead(nn.Module):
             else:
                 avg_pool = nn.AvgPool3d(pool_size[pathway], stride=1)
             self.add_module("pathway{}_avgpool".format(pathway), avg_pool)
-
         if dropout_rate > 0.0:
             self.dropout = nn.Dropout(dropout_rate)
         # Perform FC in a fully convolutional manner. The FC layer will be
@@ -398,6 +397,12 @@ class ResNetBasicHead(nn.Module):
         # Perform dropout.
         if hasattr(self, "dropout"):
             x = self.dropout(x)
+
+        # modify for my task
+        x = x.view(x.shape[0], -1)
+        return x
+
+
         x = self.projection(x)
 
         # Performs fully convlutional inference.

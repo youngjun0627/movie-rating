@@ -10,6 +10,7 @@ from .slowfast.models import head_helper
 from .slowfast.config.defaults import get_cfg
 from .slowfast.models import checkpoint as cu 
 import os
+from torchsummary import summary
 
 def get_slowfast(device):
     # slowfast net
@@ -18,16 +19,21 @@ def get_slowfast(device):
     torch.manual_seed(cfg.RNG_SEED)
     # Load config from cfg.
     root = '/home/uchanlee/uchanlee/movie-rating/video_classification/MODELS/slowfast'
-    cfg_file = os.path.join(root,'config/slowfast_config.yaml')
+    cfg_file = os.path.join(root,'config/slow_config.yaml')
     cfg.merge_from_file(cfg_file)
-    slowfast_model = build_model(cfg, gpu_id=device)
+    model = build_model(cfg, gpu_id=device)
     cfg.TRAIN.CHECKPOINT_TYPE = 'caffe2'
-    cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root,'saved_model/kinetics.pkl')
+    cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root, 'saved_model/C2D_8x8_R50.pkl')
+    #cfg.TRAIN.CHECKPOINT_FILE_PATH = os.path.join(root,'saved_model/kinetics.pkl')
     #slowfast_model.load_state_dict(torch.load(cfg.TRAIN.CHECKPOINT_FILE_PATH), strict=False, encoding='latin1')
-     
+    
+    '''
+    pretrained model
+    '''
+    
     cu.load_checkpoint(
     cfg.TRAIN.CHECKPOINT_FILE_PATH,
-      slowfast_model,
+      model,
         False,
           None,
             inflation=False,
@@ -42,7 +48,8 @@ def get_slowfast(device):
     print(genre.shape)
     print(age.shape)
     '''
-    return slowfast_model
+    summary(model, input_size = (1, 64, 3, 112, 112))
+    #return slowfast_model
 
 if __name__=='__main__':
     get_slowfast(torch.device('cuda:1'))

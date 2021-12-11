@@ -32,6 +32,7 @@ from torchtext.vocab import Vocab
 from collections import Counter
 from torchtext.data.utils import get_tokenizer
 from MODELS.slowfast_ft import get_slowfast
+from MODELS.slow_ft import OnlyVideo
 from MODELS.x3d_ft import get_x3d
 
 print(os.getpid())
@@ -89,7 +90,8 @@ def main():
     #model = SlowFast(class_num = params['num_classes'], label_num = params['label_num'])
 
 
-    model = get_slowfast(device)
+    #model = get_slowfast(device)
+    model = OnlyVideo(device)
     #model = get_x3d(device)   
     if params['pretrained'] != '':
         pretrained_dict = torch.load(params['pretrained'], map_location='cpu')

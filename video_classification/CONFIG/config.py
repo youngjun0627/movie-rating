@@ -1,20 +1,20 @@
 
 params = dict()
 params['num_classes']=4
-params['dataset'] = '/home/uchanlee/uchanlee/uchan/final_project3/UTILS'
+params['dataset'] = '/home/uchanlee/uchanlee/movie-rating/video_classification/UTILS'
 params['use_plot'] = False
 params['use_audio'] = False
 params['use_video'] = True
 params['epoch_num']=300
 params['label_num'] = 4
 params['mode']='multi'
-params['batch_size']=4
+params['batch_size']=1
 params['step']=50
 params['model'] = 'slowfast_multitask'
 params['size']=112
 params['num_workers']=2
 params['momentum']=0.9
-params['learning_rate']=0.0025
+params['learning_rate']=0.02
 params['weight_decay']=1e-5
 params['display']=370
 params['clip_len']=1024

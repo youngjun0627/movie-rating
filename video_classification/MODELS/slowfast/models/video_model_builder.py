@@ -453,7 +453,7 @@ class SlowFast(nn.Module):
         features = self.dp(self.mish(self.fc(features)))
         content = []
         for fc1, fc2 in zip(self.content_fc1, self.content_fc2):
-            content.append(fc2(self.dp(F.leaky_relu(fc1(features)))))
+            content.append(fc2(self.dp(self.mish(fc1(features)))))
         content = torch.stack(content)
         genre = self.genre_fc(features)
         age = self.age_fc(features)
