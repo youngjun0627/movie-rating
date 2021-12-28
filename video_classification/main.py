@@ -25,7 +25,6 @@ from CONFIG.config import params
 #from CONFIG.slowfast_multi import params
 #from CONFIG.slowfast_multi_v2 import params
 from torch.backends import cudnn
-from adamp import SGDP, AdamP
 #from activate import train, val
 from activate import train, val
 from torchtext.vocab import Vocab
@@ -69,7 +68,8 @@ def main():
                         batch_size=params['batch_size'],
                         shuffle=True,
                         num_workers=params['num_workers'],
-                        collate_fn = Collate_batch)
+                        collate_fn = Collate_batch,
+                        drop_last=True)
 
     val_dataset = VideoDataset(params['dataset'], size=params['size'],mode='validation', play_time=params['clip_len'],frame_sample_rate=params['frame_sample_rate'], transform = val_transform, sub_classnum = params['num_classes'], label_num=params['label_num'], stride_num = params['stride'], use_plot = params['use_plot'], use_video = params['use_video'], use_audio=params['use_audio'])
     val_dataloader = DataLoader(
@@ -77,7 +77,8 @@ def main():
                         batch_size=params['batch_size'],
                         shuffle=False,
                         num_workers=params['num_workers'],
-                        collate_fn = Collate_batch)
+                        collate_fn = Collate_batch,
+                        drop_last=True)
 
     print('train_dataset : batch_size -> {}, step_size -> {}, frames -> {}'.format(params['batch_size'],len(train_dataloader), params['clip_len']))
     print('validation_dataset : batch_size -> {}, step_size -> {}, frames -> {}'.format(params['batch_size'],len(val_dataloader), params['clip_len']))
